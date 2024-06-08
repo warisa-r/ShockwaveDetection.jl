@@ -3,6 +3,9 @@ uuid = "a75b99cc-be56-4638-99bc-d89fa43b9ca1"
 authors = ["Warisa <compund555@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+ShockwaveProperties = "77d2bf28-a3e9-4b9c-9fcf-b85f74cc8a50"
+
 [compat]
 julia = "1.9"
 
