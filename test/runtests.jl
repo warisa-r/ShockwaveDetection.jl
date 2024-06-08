@@ -1,6 +1,6 @@
-using ShockwaveDetection
 using Test
+using ShockwaveDetection
 
 @testset "ShockwaveDetection.jl" begin
-    # Write your tests here.
+    @test write_output() == "Hello from Julia!"
 end
