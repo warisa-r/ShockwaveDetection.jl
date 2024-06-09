@@ -14,7 +14,7 @@ Converts conserved state variables to primitive variables.
 - `velocity_field::Array{Float64, 2}`: A 2D array containing the velocity field.
 - `pressure_field::Array{Float64, 2}`: A 2D array containing the pressure field.
 
-Euler equations are typically represented in a "conserved" form, where the vector u contains (density, momentum, total energy) at each point x and time t. This function converts these conserved state variables to primitive variables (density, velocity, pressure) in order to calculate delta1 and delta2 according to [6].
+Euler equations are typically represented in a "conserved" form, where the vector u contains (density, momentum, total energy) at each point x and time t. This function converts these conserved state variables to primitive variables (density, velocity, pressure).
 
 The `u_values` parameter is a 3D array representing the conserved state variables at each point x and time t. This function iterates over each time step and calculates the primitive state vector for density, velocity, and pressure using appropriate transformations. The resulting primitive variables are stored in separate arrays `density_field`, `velocity_field`, and `pressure_field`, and returned.
 """

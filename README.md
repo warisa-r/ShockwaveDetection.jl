@@ -11,7 +11,10 @@ Currently, it can
 - Detect 1D shock by detecting large gradients across properties with a customizable paramamer `threshold`
 - Visualize the change of properties along with shock positions
 
+This package also contains some documentation (far from complete or acceptable)
+
 ## Goals
 - Develop 'better' methods to detect the shock
 - Develop visualization of shock position in x axis against time
 - Process 2D data (Waiting for the materials)
+- Develop test series that alligns with the goal (probably from /examples)

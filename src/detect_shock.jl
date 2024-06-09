@@ -15,7 +15,7 @@ function compute_gradients(arr::AbstractVector, x)
 end
 
 #TODO: make this work
-function rankine_hugonoit(u_values_t, shock_locations)
+function rankine_hugoniot(u_values_t, shock_locations)
     # Define normal and tangential vectors for 1D case because state_behind needs it
     n = [1]
     t = [0]
@@ -66,7 +66,7 @@ function detect_normal_shocks_at_timestep(u_values_t, density_at_t, velocity_at_
     shock_locations = intersect(intersect(shock_location_density, shock_location_velocity), shock_location_pressure)
 
     #Comment this out everything works for now
-    #rankine_hugonoit(u_values_t, shock_locations)
+    #rankine_hugoniot(u_values_t, shock_locations)
     
     return shock_locations
 end
