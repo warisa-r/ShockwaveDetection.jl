@@ -17,7 +17,7 @@ You can install ShockDetection.jl using the Julia package manager. From the Juli
 ```@docs
 read_output_file
 convert_to_primitive
-detect_shock
+detect_normal_shock
 create_wave_animation
 create_wave_animation_with_shock
 ```

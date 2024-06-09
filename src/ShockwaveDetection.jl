@@ -3,7 +3,7 @@ module ShockwaveDetection
 export write_output
 export read_output_file
 export convert_to_primitive
-export detect_shock
+export detect_normal_shock
 export create_wave_animation, create_wave_animation_with_shock
 
 
