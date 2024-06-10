@@ -14,11 +14,13 @@ function compute_gradients(arr::AbstractVector, x)
     return grad
 end
 
-#TODO: make this work
-function rankine_hugoniot(u_values_t, shock_locations)
+#TODO: more efficient?
+function shock_rankine_hugoniot(shock_locations, u_values_t)
     # Define normal and tangential vectors for 1D case because state_behind needs it
     n = [1]
     t = [0]
+
+    normal_shock_positions = []
 
     # flux for the euler equations from ShockwaveProperties.jl's test since it's not exported
     function F(u::ConservedProps)
@@ -29,23 +31,23 @@ function rankine_hugoniot(u_values_t, shock_locations)
 
     for shock_location in shock_locations
         u_L = ConservedProps(u_values_t[:, shock_location])
-        if mach_number(u_L; gas = DRY_AIR)[1] <= 0.0
-            println("Mach number leq 0 at shock location $shock_location and mach number is $(mach_number(u_L; gas = DRY_AIR))")
-        else
-            println("Mach number gt 0 at shock location $shock_location and mach number is $(mach_number(u_L; gas = DRY_AIR))")
-            println(shock_temperature_ratio(mach_number(u_L; gas = DRY_AIR), n; gas = DRY_AIR))
-            println(shock_pressure_ratio(mach_number(u_L; gas = DRY_AIR), n; gas = DRY_AIR))
-            println(shock_density_ratio(mach_number(u_L; gas = DRY_AIR), n; gas = DRY_AIR))
+        # Check if Mach number is greater than 1 at the shock location -> for normal shock in supersonic flow
+        # else, the shock is not a normal shock and this is not considered
+        if mach_number(u_L; gas = DRY_AIR)[1] >= 1
+            # TODO: Look further away to get left and right state
             u_R = state_behind(u_L, n, t; gas = DRY_AIR)
             # Check Rankine-Hugonoit conditions
             if all(isapprox.(ustrip.(F(u_L) .* n), ustrip.(F(u_R) .* n); atol=1e-6))
                 println("Rankine-Hugonoit conditions are satisfied at shock location $shock_location")
+                push!(normal_shock_positions, shock_location)
             else
                 println("Rankine-Hugonoit conditions are not satisfied at shock location $shock_location")
             end
         end
         
     end
+
+    return normal_shock_positions
 
 end
 
@@ -66,7 +68,7 @@ function detect_normal_shocks_at_timestep(u_values_t, density_at_t, velocity_at_
     shock_locations = intersect(intersect(shock_location_density, shock_location_velocity), shock_location_pressure)
 
     #Comment this out everything works for now
-    #rankine_hugoniot(u_values_t, shock_locations)
+    shock_locations = shock_rankine_hugoniot(shock_locations, u_values_t)
     
     return shock_locations
 end
