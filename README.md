@@ -14,7 +14,8 @@ Currently, it can
 This package also contains some documentation (far from complete or acceptable)
 
 ## Goals
-- Develop 'better' methods to detect the shock
-- Develop visualization of shock position in x axis against time
+- Develop 'better' methods to detect the shock: complete the Rankine-Hugoniot condition
+- Make an abstract struct ShockDetector with functionality solve, visualize with child ShockDetector1D
+- Develop visualization of shock position in the axis against time
 - Process 2D data (Waiting for the materials)
-- Develop test series that alligns with the goal (probably from /examples)
+- Develop a test series that aligns with the goal (probably from /examples)
