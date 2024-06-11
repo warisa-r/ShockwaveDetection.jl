@@ -14,7 +14,11 @@ Currently, it can
 This package also contains some documentation (far from complete or acceptable)
 
 ## Goals
-- [ ] Develop 'better' methods to detect the shock: complete the Rankine-Hugoniot condition
+- [x] Develop 'better' methods to detect the shock
+      - [ ] Complete the Rankine-Hugoniot condition
+            - [x] Implement the rough check when uL and uR from state_behind are exactly the same position.
+            - [ ] Consider the smoothness by looking at CFL and grid size of hll solver
+      - [ ] Make threshold a customizable fraction to be multiplied with max gradient instead of just an unquantified number
 - [ ] Make an abstract struct ShockDetector with functionality solve, visualize with child ShockDetector1D (?)
 - [ ] Develop visualization of shock position in the axis against time -> check GLMakie
 - [ ] Process 2D data (Waiting for the materials)
