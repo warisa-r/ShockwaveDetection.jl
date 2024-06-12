@@ -153,3 +153,5 @@ function detect(alg::Simple1DShockDetectionAlgo, threshold = 0.5)
     end
     return shock_positions_over_time
 end
+
+# TODO: Create a class call ShockwaveData that either call the solver given boundary_conditions or read the output file
