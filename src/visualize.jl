@@ -34,25 +34,7 @@ function create_wave_animation(x0_xmax, t_values, density_field, velocity_field,
     return anim
 end
 
-"""
-    create_wave_animation_with_shock(x, t_values, density_field, velocity_field, pressure_field, shock_positions_over_time; save_file=false)
-
-Create an animation of density, velocity, and pressure fields over time, with markers for shock positions.
-
-# Arguments
-- `x0_xmax::Tuple{Float64, Float64}`: A tuple containing the minimum and maximum x values.
-- `t_values::Vector`: Time values.
-- `density_field::Matrix`: Density field over space and time.
-- `velocity_field::Matrix`: Velocity field over space and time.
-- `pressure_field::Matrix`: Pressure field over space and time.
-- `shock_positions_over_time::Vector{Vector{Int}}`: Shock positions over time.
-- `save_file::Bool`: Whether to save the animation as a gif file (default: false).
-
-# Returns
-- `anim::Animation`: Animation object.
-
-This function creates an animation of density, velocity, and pressure fields over time, with markers indicating shock positions at each time step. The animation is generated using the Plots.jl package and returned as an Animation object. If `save_file` is true, the animation is saved as a gif file with the filename 'density_velocity_pressure_over_time_with_shock_positions.gif'.
-"""
+# TODO: make this compatible with the struct
 function create_wave_animation_with_shock(x0_xmax, t_values, density_field, velocity_field, pressure_field, shock_positions_over_time)
     # Create a range of x values
     x = range(x0_xmax[1], stop=x0_xmax[2], length=size(density_field, 1))
