@@ -19,7 +19,7 @@ This package also contains some documentation (far from complete or acceptable)
 2. [ ] Complete the Rankine-Hugoniot condition
     1. [x] Implement the rough check when uL and uR from state_behind are exactly the same position.
     2. [ ] Consider the smoothness by looking at CFL and grid size of hll solver 
-3. [ ] Make an abstract struct ShockDetector with functionality solve, visualize with child ShockDetector1D (?)
+3. [ ] Make a struct calling the solver to get the results or reading the output from a file and call ShockwaveDetectionAlgo with that
 4. [ ] Develop visualization of shock position in the axis against time. Making velocity field a heat map? -> check GLMakie
 5. [ ] Process 2D data (Waiting for the materials)
 6. [ ] Develop a test series that aligns with the goal (probably from /examples)
