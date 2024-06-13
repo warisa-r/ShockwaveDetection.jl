@@ -46,3 +46,23 @@ function read_output_file(filename)
     end
 end
 
+struct FlowData
+    u_values::Array{Float64, 3}
+    density_field::Array{Float64, 2}
+    velocity_field::Array{Float64, 2}
+    pressure_field::Array{Float64, 2}
+    x0_xmax::Vector{Float64}
+    t_values::Array{Float64, 1}
+end # FlowData
+
+function FlowData(file_path::String)
+    x0_xmax, t_values, u_values, _ = read_output_file(file_path)
+    density_field, velocity_field, pressure_field = convert_to_primitive(u_values)
+    return FlowData(u_values, density_field, velocity_field, pressure_field, x0_xmax, t_values)
+end
+
+#TODO: Implement this
+# Call the solver with given boundary conditions
+function FlowData()
+    println("Not implemented yet")
+end

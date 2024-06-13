@@ -2,21 +2,23 @@
 using Plots
 
 """
-    create_wave_animation(x0_xmax, t_values, density_field, velocity_field, pressure_field)
+    create_wave_animation(flow_data::FlowData)
 
-Create an animation of density, velocity, and pressure fields over time.
+Create an animation of density, velocity, and pressure fields over time from properties of the flow.
 
 # Arguments
-- `x0_xmax::Tuple{Float64, Float64}`: A tuple containing the minimum and maximum x values.
-- `t_values::Array{Float64}`: An array of time values.
-- `density_field::Array{Float64, 2}`: A 2D array representing the density field. Each column represents the density at a different time.
-- `velocity_field::Array{Float64, 2}`: A 2D array representing the velocity field. Each column represents the velocity at a different time.
-- `pressure_field::Array{Float64, 2}`: A 2D array representing the pressure field. Each column represents the pressure at a different time.
+- `flow_data::FlowData`: A struct containing the flow data of x values, time steps, density field, velocity field, and pressure field.
 
 # Returns
-- This function saves an animation as a gif file named "density_velocity_pressure_over_time.gif" in the current directory and returns nothing.
+- This function saves an animation as a gif file named "density_velocity_pressure_over_time.gif" in the current directory and returns the animated object.
 """
-function create_wave_animation(x0_xmax, t_values, density_field, velocity_field, pressure_field)
+function create_wave_animation(flow_data::FlowData)
+    x0_xmax = flow_data.x0_xmax
+    t_values = flow_data.t_values
+    density_field = flow_data.density_field
+    velocity_field = flow_data.velocity_field
+    pressure_field = flow_data.pressure_field
+
     # Create a range of x values
     x = range(x0_xmax[1], stop=x0_xmax[2], length=size(density_field, 1))
 
@@ -34,8 +36,26 @@ function create_wave_animation(x0_xmax, t_values, density_field, velocity_field,
     return anim
 end
 
-# TODO: make this compatible with the struct
-function create_wave_animation_with_shock(x0_xmax, t_values, density_field, velocity_field, pressure_field, shock_positions_over_time)
+"""
+    create_wave_animation_with_shock(flow_data::FlowData, shock_positions_over_time)
+
+Create an animation of density, velocity, and pressure fields over time from properties of the flow with shock wave positions.
+
+# Arguments
+- `flow_data::FlowData`: A struct containing the flow data of x values, time steps, density field, velocity field, and pressure field.
+- `shock_positions_over_time::Vector{Vector{Int}}`: A vector of vectors containing the shock positions over time from the detection algorithm.
+
+# Returns
+- This function saves an animation as a gif file named "density_velocity_pressure_over_time_with_shock_positions.gif" in the current directory 
+and returns the animated object.
+"""
+function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_over_time)
+    x0_xmax = flow_data.x0_xmax
+    t_values = flow_data.t_values
+    density_field = flow_data.density_field
+    velocity_field = flow_data.velocity_field
+    pressure_field = flow_data.pressure_field
+
     # Create a range of x values
     x = range(x0_xmax[1], stop=x0_xmax[2], length=size(density_field, 1))
 
