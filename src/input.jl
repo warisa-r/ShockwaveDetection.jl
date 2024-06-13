@@ -72,7 +72,7 @@ end
 function simulate_1D(x_min, x_max, ncells_x, x_bcs, T::Float64, u0, 
     gas::CaloricallyPerfectGas = DRY_AIR,
     CFL = 0.75,
-    max_tsteps = typemax(Int))
+    max_tsteps = typemax(Int); verbose = false)
 
     xs = range(x_min, x_max; length = ncells_x + 1)
     Δx = step(xs)
@@ -93,7 +93,10 @@ function simulate_1D(x_min, x_max, ncells_x, x_bcs, T::Float64, u0,
         if t[end] + Δt > T
             Δt = T - t[end]
         end
-        (length(t) % 10 == 0) && @show length(t), t[end], Δt
+
+        if verbose == true
+            (length(t) % 10 == 0) && @show length(t), t[end], Δt
+        end
         step_euler_hll!(u_next, u, Δt, Δx, x_bcs; gas = gas)
         u = u_next
         push!(t, t[end] + Δt)
