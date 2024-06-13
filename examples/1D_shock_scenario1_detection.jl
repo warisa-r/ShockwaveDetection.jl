@@ -1,3 +1,7 @@
+using Euler2D
+using LinearAlgebra
+using ShockwaveProperties
+using Unitful
 using ShockwaveDetection
 
 flow_data = FlowData("examples/data/euler_scenario_1.out")
