@@ -1,3 +1,8 @@
+using Euler2D
+using LinearAlgebra
+using ShockwaveProperties
+using Unitful
+
 """
     read_output_file(filename)
 
@@ -62,7 +67,36 @@ function FlowData(file_path::String)
 end
 
 #TODO: Implement this
-# Call the solver with given boundary conditions
-function FlowData()
-    println("Not implemented yet")
+# Copy of the function in the script Euler2D.jl/scripts/1d_plots.jl with slight modification
+# to be used in the ShockwaveDetection module
+function simulate_1D(x_min, x_max, ncells_x, x_bcs, T::Float64, u0, 
+    gas::CaloricallyPerfectGas = DRY_AIR,
+    CFL = 0.75,
+    max_tsteps = typemax(Int))
+
+    xs = range(x_min, x_max; length = ncells_x + 1)
+    Δx = step(xs)
+    u = stack([u0(x + Δx / 2) for x ∈ xs[1:end-1]])
+    u_next = zeros(eltype(u), size(u))
+    t = [0.0]
+
+    
+    while ((!(t[end] > T || t[end] ≈ T)) && length(t) <= max_tsteps)
+        try
+            Δt = maximum_Δt(x_bcs, u, Δx, CFL, 1; gas = gas)
+        catch err
+            @show length(t), t[end]
+            println("Δt calculation failed.")
+            println(typeof(err))
+            break
+        end
+        if t[end] + Δt > T
+            Δt = T - t[end]
+        end
+        (length(t) % 10 == 0) && @show length(t), t[end], Δt
+        step_euler_hll!(u_next, u, Δt, Δx, x_bcs; gas = gas)
+        u = u_next
+        push!(t, t[end] + Δt)
+    end
+    return (t[end], u)
 end

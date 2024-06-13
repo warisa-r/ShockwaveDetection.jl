@@ -1,7 +1,7 @@
 module ShockwaveDetection
 
 export write_output
-export read_output_file, FlowData
+export read_output_file, FlowData, simulate_1D
 export convert_to_primitive
 export Simple1DShockDetectionAlgo, detect
 export create_wave_animation, create_wave_animation_with_shock
