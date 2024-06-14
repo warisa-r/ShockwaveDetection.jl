@@ -43,12 +43,12 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, x
     threshold_pressure = threshold * max_pressure_grad
 
     # Find points where the gradient exceeds a certain threshold
-    shock_location_density = findall(gradient -> abs(gradient) > threshold_density, density_grad)
-    shock_location_velocity = findall(gradient -> abs(gradient) > threshold_velocity, velocity_grad)
-    shock_location_pressure = findall(gradient -> abs(gradient) > threshold_pressure, pressure_grad)
+    discontinuity_location_density = findall(gradient -> abs(gradient) > threshold_density, density_grad)
+    discontinuity_location_velocity = findall(gradient -> abs(gradient) > threshold_velocity, velocity_grad)
+    discontinuity_location_pressure = findall(gradient -> abs(gradient) > threshold_pressure, pressure_grad)
 
     # Combine detections (common shock location across variables)
-    shock_locations = intersect(intersect(shock_location_density, shock_location_velocity), shock_location_pressure)
+    shock_locations = intersect(intersect(discontinuity_location_density, discontinuity_location_velocity), discontinuity_location_pressure)
     
     return shock_locations
 end

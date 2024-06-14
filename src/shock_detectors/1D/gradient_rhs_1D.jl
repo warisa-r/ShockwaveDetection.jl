@@ -49,6 +49,7 @@ function shock_rankine_hugoniot(discontinuity_locations, u_values_t)
     return normal_shock_positions
 end
 
+# TODO: Add gas to this struct
 # RHS stands for Rankine-Hugoniot Shock
 struct GradientRHShockDetectionAlgo <: Abstract1DShockDetectionAlgo
     threshold::Float64

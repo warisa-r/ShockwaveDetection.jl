@@ -1,17 +1,29 @@
 using ShockwaveProperties
 
-function shock_entropy_change(discontinuity_locations, u_values_t, gas = DRY_AIR)
-    shock_locations = []
-    
+# Upstream (Approaching the Shock): The entropy gradient typically decreases or remains constant.
+# Across the Shock: There is a sudden increase in entropy, causing the entropy gradient to change abruptly.
+# Downstream (After the Shock): The entropy gradient stabilizes at a higher value due to the increased entropy.
+# We assume that at the boundary, there is no shock (kind of true looking at the animated plots) 
+function shock_entropy_change(discontinuity_locations, density_at_t, pressure_at_t, x, gas)
+    gamma = gas.γ
+
+    entropy_at_t = pressure_at_t ./ density_at_t.^ gamma
+    entropy_grad = compute_gradients(entropy_at_t, x)
+
+    # Find locations where entropy gradient changes sign (indicating shock)
+    shock_location_entropy = findall(gradient -> sign(gradient) != sign(entropy_grad[1]), entropy_grad)
+
+    shock_locations = intersect(discontinuity_locations, shock_location_entropy)
+
     return shock_locations
 end
 
 struct EntropyGradientShockDetectionAlgo <: Abstract1DShockDetectionAlgo
-    threshold::Float64
     gas::CaloricallyPerfectGas
+    threshold::Float64
 end # EntropyGradientShockDetectionAlgo
 
-function detect_entropy_normal_shocks_at_timestep(u_values_t, density_at_t, velocity_at_t, pressure_at_t, x, alg)
+function detect_entropy_normal_shocks_at_timestep(density_at_t, velocity_at_t, pressure_at_t, x, alg)
     threshold = alg.threshold
     gas = alg.gas
 
@@ -19,7 +31,7 @@ function detect_entropy_normal_shocks_at_timestep(u_values_t, density_at_t, velo
     discontinuity_locations = detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, x, threshold)
 
     #  Check if Rankine-Hugoniot conditions are satisfied
-    shock_locations = shock_entropy_change(discontinuity_locations, u_values_t, gas)
+    shock_locations = shock_entropy_change(discontinuity_locations, density_at_t, pressure_at_t, x, gas)
     
     return shock_locations
 end
@@ -45,7 +57,7 @@ function detect(flow_data::FlowData, alg::EntropyGradientShockDetectionAlgo)
         u_values_t = u_values[:, :, t_step]
         
         # Use the simple shock detection algorithm to detect the normal shock
-        shock_positions = detect_entropy_normal_shocks_at_timestep(u_values_t, density_field_t, velocity_field_t, pressure_field_t, x, alg)
+        shock_positions = detect_entropy_normal_shocks_at_timestep(density_field_t, velocity_field_t, pressure_field_t, x, alg)
         push!(shock_positions_over_time, shock_positions)
     end
     return shock_positions_over_time
