@@ -5,7 +5,7 @@ using Unitful
 using ShockwaveDetection
 
 flow_data = FlowData("examples/data/euler_scenario_1.out")
-detection_alg = Simple1DShockDetectionAlgo(0.2)
+detection_alg = GradientRHShockDetectionAlgo(0.2)
 
 # Plot the animation of the properties over time
 #anim = create_wave_animation(flow_data)
