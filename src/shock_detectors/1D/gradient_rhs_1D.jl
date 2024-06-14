@@ -1,16 +1,8 @@
-# Use Interpolations.jl to perform np.gradient-like operations
-using LinearAlgebra: I
 using Unitful: ustrip
 using ShockwaveProperties: state_behind, ConservedProps, DRY_AIR, mach_number, shock_temperature_ratio, shock_density_ratio, shock_pressure_ratio
 
-
-
-abstract type AbstractShockDetectionAlgo end
-# Abstract base type for 1D shock detectors
-abstract type Abstract1DShockDetectionAlgo <: AbstractShockDetectionAlgo end
-
 #TODO: more efficient?
-function shock_rankine_hugoniot(discontinuity_locations, u_values_t)
+function shock_rankine_hugoniot(discontinuity_locations, u_values_t, gas)
     # Define normal and tangential vectors for 1D case because state_behind needs it
     n = [1]
     t = [0]
@@ -20,7 +12,7 @@ function shock_rankine_hugoniot(discontinuity_locations, u_values_t)
     # Flux for the euler equations from ShockwaveProperties.jl's test since it's not exported
     function F(u::ConservedProps)
         v = u.ρv / u.ρ # velocity
-        P = pressure(u; gas = DRY_AIR)
+        P = pressure(u; gas)
         return vcat(u.ρv', (u.ρv .* v' + I * P), (v .* (u.ρE + P))') # stack row vectors
     end
 
@@ -29,10 +21,10 @@ function shock_rankine_hugoniot(discontinuity_locations, u_values_t)
         u_front = ConservedProps(u_values_t[:, discontinuity])
         # Check if Mach number is greater than 1 at the shock location -> for normal shock in supersonic flow
         # else, the shock is not a normal shock and this is not considered
-        if abs(mach_number(u_front; gas = DRY_AIR)[1]) >= 1
+        if abs(mach_number(u_front; gas)[1]) >= 1
             # Function implemented in ShockwaveProperties.jl from Anderson&Anderson(only holds for Mach number >= 1)
             # But in reality the Rankine-Hugonoit conditions hold for all discontinuities
-            u_behind = state_behind(u_front, n, t; gas = DRY_AIR)
+            u_behind = state_behind(u_front, n, t; gas)
             # Check Rankine-Hugonoit conditions
             if all(isapprox.(ustrip.(F(u_front) .* n), ustrip.(F(u_behind) .* n); atol=1e-6))
                 println("Rankine-Hugonoit conditions are satisfied at shock location $discontinuity")
@@ -49,9 +41,9 @@ function shock_rankine_hugoniot(discontinuity_locations, u_values_t)
     return normal_shock_positions
 end
 
-# TODO: Add gas to this struct
 # RHS stands for Rankine-Hugoniot Shock
 struct GradientRHShockDetectionAlgo <: Abstract1DShockDetectionAlgo
+    gas::CaloricallyPerfectGas
     threshold::Float64
 end # GradientRHShockDetectionAlgo
 
@@ -60,12 +52,13 @@ end # GradientRHShockDetectionAlgo
 # It then checks if the Rankine-Hugoniot conditions are satisfied at these locations.
 function detect_RHS_normal_shocks_at_timestep(u_values_t, density_at_t, velocity_at_t, pressure_at_t, x, alg)
     threshold = alg.threshold
+    gas = alg.gas
 
     # Detect discontinuities in the flow at a given time step
     discontinuity_locations = detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, x, threshold)
 
     #  Check if Rankine-Hugoniot conditions are satisfied
-    shock_locations = shock_rankine_hugoniot(discontinuity_locations, u_values_t)
+    shock_locations = shock_rankine_hugoniot(discontinuity_locations, u_values_t, gas)
     
     return shock_locations
 end

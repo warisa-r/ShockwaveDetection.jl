@@ -4,7 +4,7 @@ using ShockwaveProperties
 using Unitful
 using ShockwaveDetection
 
-flow_data = FlowData("examples/data/sod1.out")
+flow_data = FlowData("examples/data/sod1.out", false)
 detection_alg = GradientEntropyShockDetectionAlgo(DRY_AIR, 0.2)
 
 # Plot the shock create_wave_animation

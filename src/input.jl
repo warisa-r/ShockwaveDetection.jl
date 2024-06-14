@@ -59,12 +59,13 @@ struct FlowData
     pressure_field::Array{Float64, 2}
     x0_xmax::Vector{Float64}
     t_values::Array{Float64, 1}
+    mach_to_m_s::Bool
 end # FlowData
 
-function FlowData(file_path::String)
+function FlowData(file_path::String, mach_to_m_s=true)
     x0_xmax, t_values, u_values, _ = read_output_file(file_path)
-    density_field, velocity_field, pressure_field = convert_to_primitive(u_values)
-    return FlowData(u_values, density_field, velocity_field, pressure_field, x0_xmax, t_values)
+    density_field, velocity_field, pressure_field = convert_to_primitive(u_values, mach_to_m_s)
+    return FlowData(u_values, density_field, velocity_field, pressure_field, x0_xmax, t_values, mach_to_m_s)
 end
 
 # Constructor that takes in the necessary parameters to simulate the 1D flow and returns the FlowData object
