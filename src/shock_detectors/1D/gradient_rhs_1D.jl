@@ -25,10 +25,11 @@ function shock_rankine_hugoniot(shock_locations, u_values_t)
     end
 
     for shock_location in shock_locations
+        
         u_L = ConservedProps(u_values_t[:, shock_location])
         # Check if Mach number is greater than 1 at the shock location -> for normal shock in supersonic flow
         # else, the shock is not a normal shock and this is not considered
-        if mach_number(u_L; gas = DRY_AIR)[1] >= 1
+        if abs(mach_number(u_L; gas = DRY_AIR)[1]) >= 1
             # TODO: Look further away to get left and right state
             u_R = state_behind(u_L, n, t; gas = DRY_AIR)
             # Check Rankine-Hugonoit conditions
