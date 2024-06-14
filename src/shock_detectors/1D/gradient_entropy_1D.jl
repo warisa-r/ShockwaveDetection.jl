@@ -5,9 +5,13 @@ using ShockwaveProperties
 # Downstream (After the Shock): The entropy gradient stabilizes at a higher value due to the increased entropy.
 # We assume that at the boundary, there is no shock (kind of true looking at the animated plots) 
 function shock_entropy_change(discontinuity_locations, density_at_t, pressure_at_t, x, gas)
+    c_v = gas.c_v
     gamma = gas.γ
 
-    entropy_at_t = pressure_at_t ./ density_at_t.^ gamma
+    # TODO: check proper source, not just use the pic u see in reddit https://www.reddit.com/r/thermodynamics/comments/113vvxq/assuming_ideal_gas_and_caloricallyperfect/
+    # Ignore the constant because it's going to get canceled out in the gradient calculation
+    entropy_at_t = c_v * log.(pressure_at_t ./ density_at_t.^gamma)
+
     entropy_grad = compute_gradients(entropy_at_t, x)
 
     # Find locations where entropy gradient changes sign (indicating shock)
