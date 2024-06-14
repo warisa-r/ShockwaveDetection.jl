@@ -120,8 +120,6 @@ function FlowData(x_min, x_max, ncells_x, x_bcs, T::Float64, u0,
         u = u_next
     end
 
-    #WHY IS THE DATA IN THE TAPE DOUBLE????? timesteps are doubled. Num cells is also doubled
-
     u_values = cat(u_values..., dims=3)
     x0_xmax = [x_min, x_max]
     density_field, velocity_field, pressure_field = convert_to_primitive(u_values)
