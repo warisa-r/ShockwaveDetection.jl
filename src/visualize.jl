@@ -72,7 +72,7 @@ function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_o
         else
             p2 = plot(x, velocity_field[:, t_step], title="Velocity at Time (Mach) $t", xlabel="x", ylabel="Velocity", label="Velocity across x", size=(800, 600))
         end
-        p3 = plot(x, pressure_field[:, t_step], title="Pressure at Time $t", xlabel="x", ylabel="Pressure", label="Pressure across x", size=(800, 600))
+        p3 = plot(x, pressure_field[:, t_step], title="Pressure at Time(Pa) $t", xlabel="x", ylabel="Pressure", label="Pressure across x", size=(800, 600))
         
         # Add markers for the shock positions
         shock_positions_t = shock_positions_over_time[t_step]

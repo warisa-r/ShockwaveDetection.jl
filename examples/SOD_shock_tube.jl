@@ -5,7 +5,7 @@ using Unitful
 using ShockwaveDetection
 
 flow_data = FlowData("examples/data/sod1.out", false)
-detection_alg = GradientEntropyShockDetectionAlgo(DRY_AIR, 0.2)
+detection_alg = GradientEntropyShockDetectionAlgo(DRY_AIR, 0.5)
 
 # Plot the shock create_wave_animation
 shock_positions_over_time = detect(flow_data, detection_alg)
