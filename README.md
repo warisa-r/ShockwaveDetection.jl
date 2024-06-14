@@ -1,7 +1,6 @@
 # ShockwaveDetection
 
 [![Build Status](https://github.com/warisa-r/ShockwaveDetection.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/warisa-r/ShockwaveDetection.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/warisa-r/ShockwaveDetection.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/warisa-r/ShockwaveDetection.jl)
 
 
 ## Brief description
@@ -11,7 +10,7 @@ Currently, it can
 - Detect 1D shock by detecting large gradients across properties with a customizable parameter `threshold`
 - Visualize the change of properties along with shock positions
 
-This package also contains some documentation (far from complete or acceptable)
+This package also contains broken and inconsistent documentation (far from complete or acceptable)
 
 ## Goals
 1. [x] Develop 'better' methods to detect the shock
