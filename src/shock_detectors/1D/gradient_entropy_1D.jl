@@ -22,10 +22,10 @@ function shock_entropy_change(discontinuity_locations, density_at_t, pressure_at
     return shock_locations
 end
 
-struct EntropyGradientShockDetectionAlgo <: Abstract1DShockDetectionAlgo
+struct GradientEntropyShockDetectionAlgo <: Abstract1DShockDetectionAlgo
     gas::CaloricallyPerfectGas
     threshold::Float64
-end # EntropyGradientShockDetectionAlgo
+end # GradientEntropyShockDetectionAlgo
 
 function detect_entropy_normal_shocks_at_timestep(density_at_t, velocity_at_t, pressure_at_t, x, alg)
     threshold = alg.threshold
@@ -40,7 +40,7 @@ function detect_entropy_normal_shocks_at_timestep(density_at_t, velocity_at_t, p
     return shock_locations
 end
 
-function detect(flow_data::FlowData, alg::EntropyGradientShockDetectionAlgo)
+function detect(flow_data::FlowData, alg::GradientEntropyShockDetectionAlgo)
     # Unpack all the values from the detector
     density_field = flow_data.density_field
     velocity_field = flow_data.velocity_field
