@@ -6,7 +6,7 @@ export convert_to_primitive
 export GradientRHShockDetectionAlgo
 export GradientEntropyShockDetectionAlgo
 export detect
-export create_wave_animation, create_wave_animation_with_shock
+export create_wave_animation, create_wave_animation_with_shock, create_tube_field_evo
 
 
 include("dummy.jl")
