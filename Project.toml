@@ -4,6 +4,7 @@ authors = ["Warisa <compund555@gmail.com> and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Euler2D = "c24a2923-03cb-4692-957a-ccd31f2ad327"
 Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
