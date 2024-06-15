@@ -1,5 +1,6 @@
 # Since @animate is a macro from the Plots.jl package, we cannot specify importing it in the module.
 using Plots
+using CairoMakie:heatmap!, record, Figure, Axis
 
 """
     create_wave_animation(flow_data::FlowData)
@@ -88,4 +89,30 @@ function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_o
     gif(anim, "density_velocity_pressure_over_time_with_shock_positions.gif", fps=10)
 
     return anim
+end
+
+function create_tube_field_evo(flow_data::FlowData, field::Symbol, tube_circumference=5.0)
+    field_data = getfield(flow_data, field)
+    t_values = flow_data.t_values
+    x0_xmax = flow_data.x0_xmax
+
+    # Define the y-range
+    y = range(0.0, tube_circumference, length=7)
+
+    # Define the x-range
+    len_x = size(field_data, 1)
+    x = range(x0_xmax[1], x0_xmax[2], length=len_x)
+
+    # Create the figure for the animation
+    fig = Figure(size = (1200, 300))
+    ax = Axis(fig[1, 1], title = "$field Field Evolution")
+
+    # Record the animation
+    record(fig, "$(field)_evolution.gif", enumerate(t_values); framerate = 10) do (t, t_step)
+        field_t = field_data[:, t]
+        field_tube = repeat(field_t, 7, 1)
+        
+        heatmap!(ax, x, y, field_tube)
+        ax.title = "$field Field - Time Step: $t_step"
+    end
 end
