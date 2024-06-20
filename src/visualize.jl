@@ -124,9 +124,11 @@ function create_tube_field_evo(flow_data::FlowData, field::Symbol, tube_circumfe
     # Record the animation
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(t_values); framerate = 10) do (t, t_step)
         field_t = field_data[:, t]
-        field_tube = repeat(field_t, 7, 1)
-        
+        field_tube = repeat(field_t, 1, 7)
+
+        # Create the heatmap and store the returned object
         CairoMakie.heatmap!(ax, x, y, field_tube)
+        
         ax.title = "$field Field - Time Step: $t_step"
     end
 end
@@ -152,10 +154,10 @@ function create_tube_field_evo_with_shock(flow_data::FlowData, shock_positions_o
         
         # Extract the field data for the current time step
         field_t = field_data[:, t]
-        # TODO: change this to either stack or check the dims kwarg for repeat
         field_tube = repeat(field_t, 1, 7)
 
-        hm = CairoMakie.heatmap!(ax, x, y, field_tube)
+        # Create the heatmap and store the returned object
+        CairoMakie.heatmap!(ax, x, y, field_tube)
     
         # Update the title with the current time step
         ax.title = "$field Field - Time Step: $t_step"
