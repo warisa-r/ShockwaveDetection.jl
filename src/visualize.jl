@@ -152,7 +152,8 @@ function create_tube_field_evo_with_shock(flow_data::FlowData, shock_positions_o
         
         # Extract the field data for the current time step
         field_t = field_data[:, t]
-        field_tube = repeat(field_t, 7, 1)
+        # TODO: change this to either stack or check the dims kwarg for repeat
+        field_tube = repeat(field_t, 1, 7)
 
         hm = CairoMakie.heatmap!(ax, x, y, field_tube)
     
