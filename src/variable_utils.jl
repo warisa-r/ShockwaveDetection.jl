@@ -18,8 +18,8 @@ Euler equations are typically represented in a "conserved" form, where the vecto
 
 The `u_values` parameter is a 3D array representing the conserved state variables at each point x and time t. This function iterates over each time step and calculates the primitive state vector for density, velocity, and pressure using appropriate transformations. The resulting primitive variables are stored in separate arrays `density_field`, `velocity_field`, and `pressure_field`, and returned.
 """
-function convert_to_primitive(u_values, mach_to_m_s=true)
-    u_prim = zeros(size(u_values))
+function convert_to_primitive(u_values::Array{T, NAXES}, mach_to_m_s=true) where {T, NAXES}
+    u_prim = similar(u_values)
     for i in 1:size(u_values, 2)
         for j in 1:size(u_values, 3)
             # primitive_state_vector returns value without units

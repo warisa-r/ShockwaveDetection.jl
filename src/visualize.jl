@@ -12,18 +12,18 @@ Create an animation of density, velocity, and pressure fields over time from pro
 # Returns
 - This function saves an animation as a gif file named "density_velocity_pressure_over_time.gif" in the current directory and returns the animated object.
 """
-function create_wave_animation(flow_data::FlowData)
-    x0_xmax = flow_data.x0_xmax
-    t_values = flow_data.t_values
+function create_wave_animation1D(flow_data::FlowData)
+    bounds = flow_data.bounds
+    tsteps = flow_data.tsteps
     density_field = flow_data.density_field
     velocity_field = flow_data.velocity_field
     pressure_field = flow_data.pressure_field
 
     # Create a range of x values
-    x = range(x0_xmax[1], stop=x0_xmax[2], length=size(density_field, 1))
+    x = range(bounds[1][1], stop=bounds[1][2], length=size(density_field, 1))
 
     # Create an animation
-    anim = @animate for (i, t) in enumerate(t_values)
+    anim = @animate for (i, t) in enumerate(tsteps)
         p1 = plot(x, density_field[:, i], title="Density at Time $t", xlabel="x", ylabel="Density(kg/m^3)", label="Density across x", size=(800, 600))
         if flow_data.mach_to_m_s
             p2 = plot(x, velocity_field[:, i], title="Velocity at Time $t", xlabel="x", ylabel="Velocity(m/s)", label="Velocity across x", size=(800, 600))
@@ -55,17 +55,17 @@ Create an animation of density, velocity, and pressure fields over time from pro
 and returns the animated object.
 """
 function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_over_time)
-    x0_xmax = flow_data.x0_xmax
-    t_values = flow_data.t_values
+    bounds = flow_data.bounds
+    tsteps = flow_data.tsteps
     density_field = flow_data.density_field
     velocity_field = flow_data.velocity_field
     pressure_field = flow_data.pressure_field
 
     # Create a range of x values
-    x = range(x0_xmax[1], stop=x0_xmax[2], length=size(density_field, 1))
+    x = range(bounds[1][1], stop=bounds[1][2], length=size(density_field, 1))
 
     # Create an animation
-    anim = @animate for (t_step, t) in enumerate(t_values)
+    anim = @animate for (t_step, t) in enumerate(tsteps)
         p1 = plot(x, density_field[:, t_step], title="Density at Time(kg/m^3) $t", xlabel="x", ylabel="Density", label="Density across x", size=(800, 600))
         if flow_data.mach_to_m_s
             p2 = plot(x, velocity_field[:, t_step], title="Velocity at Time (m/s) $t", xlabel="x", ylabel="Velocity", label="Velocity across x", size=(800, 600))
@@ -105,15 +105,15 @@ and returns the animated object.
 """
 function create_tube_field_evo(flow_data::FlowData, field::Symbol, tube_circumference=5.0)
     field_data = getfield(flow_data, field)
-    t_values = flow_data.t_values
-    x0_xmax = flow_data.x0_xmax
+    tsteps = flow_data.tsteps
+    bounds = flow_data.bounds
 
     # Define the y-range
     y = range(0.0, tube_circumference, length=7)
 
     # Define the x-range
     len_x = size(field_data, 1)
-    x = range(x0_xmax[1], x0_xmax[2], length=len_x)
+    x = range(bounds[1][1], bounds[1][2], length=len_x)
 
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 400))
@@ -122,7 +122,7 @@ function create_tube_field_evo(flow_data::FlowData, field::Symbol, tube_circumfe
     #TODO: add a colorbar
 
     # Record the animation
-    CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(t_values); framerate = 10) do (t, t_step)
+    CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
         field_t = field_data[:, t]
         field_tube = repeat(field_t, 1, 7)
 
@@ -135,22 +135,22 @@ end
 
 function create_tube_field_evo_with_shock(flow_data::FlowData, shock_positions_over_time, field::Symbol, tube_circumference=5.0)
     field_data = getfield(flow_data, field)
-    t_values = flow_data.t_values
-    x0_xmax = flow_data.x0_xmax
+    tsteps = flow_data.tsteps
+    bounds = flow_data.bounds
 
     # Define the y-range
     y = range(0.0, tube_circumference, length=7)
 
     # Define the x-range
     len_x = size(field_data, 1)
-    x = range(x0_xmax[1], x0_xmax[2], length=len_x)
+    x = range(bounds[1][1], bounds[1][2], length=len_x)
 
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 400))
     ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
 
     # Record the animation
-    CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(t_values); framerate = 10) do (t, t_step)
+    CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
         
         # Extract the field data for the current time step
         field_t = field_data[:, t]
@@ -174,12 +174,12 @@ end
 # TODO: Check if this works. Too long to run. So I didnt test this
 function create_tube_field_evo_3D(flow_data::FlowData, field::Symbol, tube_circumference=5.0)
     field_data = getfield(flow_data, field)
-    t_values = flow_data.t_values
-    x0_xmax = flow_data.x0_xmax
+    tsteps = flow_data.tsteps
+    bounds = flow_data.bounds
 
     # Define the x-range
     len_x = size(field_data, 1)
-    x = range(x0_xmax[1], x0_xmax[2], length=len_x)
+    x = range(bounds[1][1], bounds[1][2], length=len_x)
 
     # Define the y-range
     y = range(0.0, tube_circumference, length=7)
@@ -192,7 +192,7 @@ function create_tube_field_evo_3D(flow_data::FlowData, field::Symbol, tube_circu
     ax = Axis3(fig[1, 1], title = "$field Field Evolution")
 
     # Record the animation
-    record(fig, "$(field)_evolution.gif", enumerate(t_values); framerate = 10) do (t, t_step)
+    record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
         field_t = field_data[:, t]
         field_tube = repeat(field_t, 7, 1)
         

@@ -45,20 +45,20 @@ function detect(flow_data::FlowData, alg::GradientEntropyShockDetectionAlgo)
     density_field = flow_data.density_field
     velocity_field = flow_data.velocity_field
     pressure_field = flow_data.pressure_field
-    x0_xmax = flow_data.x0_xmax
-    t_values = flow_data.t_values
-    u_values = flow_data.u_values
+    bounds = flow_data.bounds
+    tsteps = flow_data.tsteps
+    u = flow_data.u
 
     len_x = size(density_field, 1)
-    x = range(x0_xmax[1], stop=x0_xmax[2], length=len_x)
+    x = range(bounds[1][1], stop=bounds[1][2], length=len_x)
 
     shock_positions_over_time = []
     
-    for t_step in 1:length(t_values)
+    for t_step in 1:length(tsteps)
         density_field_t = density_field[:, t_step]
         velocity_field_t = velocity_field[:, t_step]
         pressure_field_t = pressure_field[:, t_step]
-        u_values_t = u_values[:, :, t_step]
+        u_values_t = u[:, :, t_step]
         
         # Use the simple shock detection algorithm to detect the normal shock
         shock_positions = detect_entropy_normal_shocks_at_timestep(density_field_t, velocity_field_t, pressure_field_t, x, alg)
