@@ -17,7 +17,7 @@ This package also an incomplete documentation (far from complete or acceptable)
    1. [x] Make threshold a customizable fraction to be multiplied with a max gradient instead of just an unquantified number
 2. [ ] Complete the Rankine-Hugoniot condition for 1D
 3. [ ] Formulate the calculation of entropy and entropy gradient properly for gradient entropy shock detection algo
-4. [x] Develop visualization of shock position in the axis against time
+4. [x] Develop visualization of shock position in the axis against time. Making velocity field a heat map? -> check GLMakie
 5. [ ] Process 2D data
 6. [ ] Develop a test series that aligns with the goal (probably from /examples)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
