@@ -123,10 +123,10 @@ function create_wave_animation_with_shock_2D(flow_data::FlowData, shock_position
     #TODO: Implement this function
 end
 
-function create_heatmap_evo(flow_data::FlowData, field::Symbol, tube_circumference=5.0; T = Float64)
+function create_heatmap_evo(flow_data::FlowData, field::Symbol; T = Float64)
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
-        create_heatmap_evo_1D(flow_data, field, tube_circumference)
+        create_heatmap_evo_1D(flow_data, field)
     elseif typeof(flow_data.u) == Array{T, 4}
         # Handle the 2D flow case
         create_heatmap_evo_2D(flow_data, field)
