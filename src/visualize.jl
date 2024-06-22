@@ -12,7 +12,19 @@ Create an animation of density, velocity, and pressure fields over time from pro
 # Returns
 - This function saves an animation as a gif file named "density_velocity_pressure_over_time.gif" in the current directory and returns the animated object.
 """
-function create_wave_animation1D(flow_data::FlowData)
+function create_wave_animation(flow_data::FlowData; T=Float64)
+    if typeof(flow_data.u) == Array{T, 3}
+        # Handle the 1D flow case
+        create_wave_animation_1D(flow_data::FlowData)
+    elseif typeof(flow_data.u) == Array{T, 4}
+        # Handle the 2D flow case
+        create_wave_animation_2D(flow_data::FlowData)
+    else
+        error("Unsupported array dimensionality for flow_data.u")
+    end
+end
+
+function create_wave_animation_1D(flow_data::FlowData)
     bounds = flow_data.bounds
     tsteps = flow_data.tsteps
     density_field = flow_data.density_field
@@ -41,6 +53,10 @@ function create_wave_animation1D(flow_data::FlowData)
     return anim
 end
 
+function create_wave_animation_2D(flow_data::FlowData)
+    #TODO: Implement this function
+end
+
 """
     create_wave_animation_with_shock(flow_data::FlowData, shock_positions_over_time)
 
@@ -54,7 +70,19 @@ Create an animation of density, velocity, and pressure fields over time from pro
 - This function saves an animation as a gif file named "density_velocity_pressure_over_time_with_shock_positions.gif" in the current directory 
 and returns the animated object.
 """
-function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_over_time)
+function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_over_time; T=Float64)
+    if typeof(flow_data.u) == Array{T, 3}
+        # Handle the 1D flow case
+        create_wave_animation_with_shock_1D(flow_data::FlowData, shock_positions_over_time)
+    elseif typeof(flow_data.u) == Array{T, 4}
+        # Handle the 2D flow case
+        create_wave_animation_with_shock_2D(flow_data::FlowData, shock_positions_over_time)
+    else
+        error("Unsupported array dimensionality for flow_data.u")
+    end
+end
+
+function create_wave_animation_with_shock_1D(flow_data::FlowData, shock_positions_over_time)
     bounds = flow_data.bounds
     tsteps = flow_data.tsteps
     density_field = flow_data.density_field
@@ -90,20 +118,23 @@ function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_o
     return anim
 end
 
-"""
-    create_tube_field_evo(flow_data::FlowData, field::Symbol, tube_circumference::Float64)
+function create_wave_animation_with_shock_2D(flow_data::FlowData, shock_positions_over_time)
+    #TODO: Implement this function
+end
 
-Create an animation of density, velocity, or pressure in the shock tube using clor to represent the values of the chosen field
+function create_heatmap_evo(flow_data::FlowData, field::Symbol, tube_circumference=5.0; T = Float64)
+    if typeof(flow_data.u) == Array{T, 3}
+        # Handle the 1D flow case
+        create_heatmap_evo_1D(flow_data, field, tube_circumference)
+    elseif typeof(flow_data.u) == Array{T, 4}
+        # Handle the 2D flow case
+        create_heatmap_evo_2D(flow_data, field)
+    else
+        error("Unsupported array dimensionality for flow_data.u")
+    end
+end
 
-# Arguments
-- `flow_data::FlowData`: A struct containing the flow data of x values, time steps, density field, velocity field, and pressure field.
-- `field::Symbol`: The field to visualize (`:density_field`, `:pressure_field`, or `:velocity_field`).
-
-# Returns
-- This function saves an animation as a gif file named "chosen_field__evolution.gif" in the current directory 
-and returns the animated object.
-"""
-function create_tube_field_evo(flow_data::FlowData, field::Symbol, tube_circumference=5.0)
+function create_heatmap_evo_1D(flow_data::FlowData, field::Symbol, tube_circumference=5.0)
     field_data = getfield(flow_data, field)
     tsteps = flow_data.tsteps
     bounds = flow_data.bounds
@@ -133,7 +164,23 @@ function create_tube_field_evo(flow_data::FlowData, field::Symbol, tube_circumfe
     end
 end
 
-function create_tube_field_evo_with_shock(flow_data::FlowData, shock_positions_over_time, field::Symbol, tube_circumference=5.0)
+function create_heatmap_evo_2D(flow_data, field)
+    #TODO: Implement this function
+end
+
+function create_heatmap_evo_with_shock(flow_data::FlowData, shock_positions_over_time, field::Symbol; T= Float64)
+    if typeof(flow_data.u) == Array{T, 3}
+        # Handle the 1D flow case
+        create_heatmap_evo_with_shock_1D(flow_data, field, shock_positions_over_time)
+    elseif typeof(flow_data.u) == Array{T, 4}
+        # Handle the 2D flow case
+        create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time)
+    else
+        error("Unsupported array dimensionality for flow_data.u")
+    end
+end
+
+function create_heatmap_evo_with_shock_1D(flow_data::FlowData, shock_positions_over_time, field::Symbol, tube_circumference=5.0)
     field_data = getfield(flow_data, field)
     tsteps = flow_data.tsteps
     bounds = flow_data.bounds
@@ -171,38 +218,6 @@ function create_tube_field_evo_with_shock(flow_data::FlowData, shock_positions_o
     end
 end
 
-# TODO: Check if this works. Too long to run. So I didnt test this
-function create_tube_field_evo_3D(flow_data::FlowData, field::Symbol, tube_circumference=5.0)
-    field_data = getfield(flow_data, field)
-    tsteps = flow_data.tsteps
-    bounds = flow_data.bounds
-
-    # Define the x-range
-    len_x = size(field_data, 1)
-    x = range(bounds[1][1], bounds[1][2], length=len_x)
-
-    # Define the y-range
-    y = range(0.0, tube_circumference, length=7)
-    
-    # Create the z-range for the tube
-    z = collect(1:7)
-    
-    # Create the figure for the animation
-    fig = Figure(size = (800, 600))
-    ax = Axis3(fig[1, 1], title = "$field Field Evolution")
-
-    # Record the animation
-    record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
-        field_t = field_data[:, t]
-        field_tube = repeat(field_t, 7, 1)
-        
-        # Create 3D tube data
-        X = repeat(x, 1, length(z))
-        Y = repeat(y', length(x), 1)
-        Z = repeat(z', length(x), 1)
-
-        # Plot the 3D surface
-        surface!(ax, X, Y, Z, colormap = :viridis, color = field_tube)
-        ax.title = "$field Field - Time Step: $t_step"
-    end
+function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time)
+    #TODO: Implement this function
 end
