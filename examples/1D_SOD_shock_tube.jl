@@ -6,5 +6,5 @@ using ShockwaveDetection
 
 flow_data = FlowData("examples/data/sod_shock_orb.tape", false)
 
-create_heatmap_evo(flow_data, :velocity_field)
-
+shock_positions_over_time = detect(flow_data, ImageProcessingShockDetectionAlgo(0.1))
+create_heatmap_evo_with_shock(flow_data, shock_positions_over_time, :density_field)

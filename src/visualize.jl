@@ -172,7 +172,6 @@ function create_heatmap_evo_2D(flow_data, field)
     ncells = flow_data.ncells
 
     # Define the x-range
-    len_x = size(field_data, 1)
     x = range(bounds[1][1], bounds[1][2], length=ncells[1])
 
     # Define the y-range
@@ -199,10 +198,10 @@ end
 function create_heatmap_evo_with_shock(flow_data::FlowData, shock_positions_over_time, field::Symbol; T= Float64)
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
-        create_heatmap_evo_with_shock_1D(flow_data, field, shock_positions_over_time)
+        create_heatmap_evo_with_shock_1D(flow_data, shock_positions_over_time, field)
     elseif typeof(flow_data.u) == Array{T, 4}
         # Handle the 2D flow case
-        create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time)
+        create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, field)
     else
         error("Unsupported array dimensionality for flow_data.u")
     end
@@ -246,6 +245,45 @@ function create_heatmap_evo_with_shock_1D(flow_data::FlowData, shock_positions_o
     end
 end
 
-function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time)
-    #TODO: Implement this function
+function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, field::Symbol)
+    field_data = getfield(flow_data, field)
+    tsteps = flow_data.tsteps
+    bounds = flow_data.bounds
+    ncells = flow_data.ncells
+
+    # Define the x-range
+    x = range(bounds[1][1], bounds[1][2], length=ncells[1])
+
+    # Define the y-range
+    y = range(bounds[2][1], bounds[2][2], length=ncells[2])
+
+    # Create the figure for the animation
+    fig = CairoMakie.Figure(size = (1000, 800))
+    ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
+
+    # Record the animation
+    CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
+        
+        # Extract the field data for the current time step
+        field_t = field_data[:, :, t]
+
+        # Create the heatmap and store the returned object
+        CairoMakie.heatmap!(ax, x, y, field_t)
+
+        # Overlay shock positions if available for the current time step
+        if !isempty(shock_positions_over_time[t])
+            shock_positions = shock_positions_over_time[t]
+            # Extract x and y coordinates from CartesianIndex
+            xs = [pos[1] for pos in shock_positions]
+            ys = [pos[2] for pos in shock_positions]
+
+            # Nail down where this is in x and y before scattering since shock_positions is just sets of indices not actual x and y values
+            x_shocks = [x[x_pos] for x_pos in xs]
+            y_shocks = [y[y_pos] for y_pos in ys]
+            CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 5)
+        end
+    
+        # Update the title with the current time step
+        ax.title = "$field Field - Time Step: $t_step"
+    end
 end
