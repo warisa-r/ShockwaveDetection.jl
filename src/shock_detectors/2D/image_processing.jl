@@ -2,19 +2,34 @@ using Images
 
 struct ImageProcessingShockDetectionAlgo <: Abstract2DShockDetectionAlgo
     threshold::Float64
+    kernelname::Symbol
 end # ImageProcessingShockDetectionAlgo
+
+function get_kernel_by_name(kernelname::Symbol)
+    if kernelname == :sobel
+        return KernelFactors.sobel
+    elseif kernelname == :prewitt
+        return KernelFactors.prewitt
+    elseif kernelname == :ando3
+        return KernelFactors.ando3
+    elseif kernelname == :scharr
+        return KernelFactors.scharr
+    elseif kernelname == :bickley
+        return KernelFactors.bickley
+    else
+        error("Unsupported kernel name: $kernelname")
+    end
+end
 
 # Function to detect sharp gradients
 function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, alg::ImageProcessingShockDetectionAlgo)
     threshold = alg.threshold
-    # Hard-coded kernel function
-    #TODO: make this an option by adding this as a property of the algorithm
-    kernelfunc = KernelFactors.sobel
+    kernelfunc = get_kernel_by_name(alg.kernelname)
 
     # Compute first gaussian derivatives along x and y directions for all property fields
-    density_grad_dx, density_grad_dy = imgradients(density_at_t,kernelfunc, "replicate")
-    velocity_grad_dx, velocity_grad_dy = imgradients(velocity_at_t,kernelfunc, "replicate")
-    pressure_grad_dx, pressure_grad_dy = imgradients(pressure_at_t,kernelfunc, "replicate")
+    density_grad_dx, density_grad_dy = imgradients(density_at_t, kernelfunc, "replicate")
+    velocity_grad_dx, velocity_grad_dy = imgradients(velocity_at_t, kernelfunc, "replicate")
+    pressure_grad_dx, pressure_grad_dy = imgradients(pressure_at_t, kernelfunc, "replicate")
 
     # Calculate gradient magnitudes for each property
     density_gradient_magnitudes = sqrt.(density_grad_dx.^2 + density_grad_dy.^2)
