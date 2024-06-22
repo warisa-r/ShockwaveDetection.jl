@@ -68,7 +68,9 @@ function detect(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo)
     
     for t_step in 1:nsteps
         density_field_t = density_field[:, :, t_step]
-        velocity_field_t = velocity_field[:, :, t_step]
+        velocity_field_x_t = velocity_field[1, :, :, t_step]
+        velocity_field_y_t = velocity_field[2, :, :, t_step]
+        velocity_field_t = sqrt.(velocity_field_x_t.^2 + velocity_field_y_t.^2)
         pressure_field_t = pressure_field[:, :, t_step]
         
         # Use the simple shock detection algorithm to detect the normal shock

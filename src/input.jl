@@ -4,6 +4,7 @@ using LinearAlgebra
 using ShockwaveProperties
 using Unitful
 
+# TODO: add the dimension of velocity_field
 struct FlowData{N, NAXES, T}
     ncells::NTuple{N, Int}
     nsteps::Int

@@ -59,18 +59,20 @@ function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s
                 # Convert Mach to m/s using speed_of_sound
                 if mach_to_m_s
                     u_prim[2, x, y, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
+                    u_prim[3, x, y, t] = u_p_M_T[3] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
                 else
                     u_prim[2, x, y, t] = u_p_M_T[2]
+                    u_prim[3, x, y, t] = u_p_M_T[3]
                 end
                 # Strip the unit of pressure so that it can be stored in an empty array
-                u_prim[3, x, y, t] = ustrip(p_u)
+                u_prim[4, x, y, t] = ustrip(p_u)
             end
         end
     end
 
     # Extract the density, velocity, and pressure fields
     density_field = u_prim[1, :, :, :]
-    velocity_field = u_prim[2, :, :, :]
-    pressure_field = u_prim[3, :, :, :]
+    velocity_field = u_prim[2:3, :, :, :]
+    pressure_field = u_prim[4, :, :, :]
     return density_field, velocity_field, pressure_field
 end

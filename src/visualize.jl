@@ -167,6 +167,9 @@ end
 
 function create_heatmap_evo_2D(flow_data, field)
     field_data = getfield(flow_data, field)
+    if field_data == :velocity_field
+        field_data = sqrt.(field_data[1, :, :, :].^2 + field_data[2, :, :, :].^2)
+    end
     tsteps = flow_data.tsteps
     bounds = flow_data.bounds
     ncells = flow_data.ncells
@@ -247,6 +250,9 @@ end
 
 function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, field::Symbol)
     field_data = getfield(flow_data, field)
+    if field_data == :velocity_field
+        field_data = sqrt.(field_data[1, :, :, :].^2 + field_data[2, :, :, :].^2)
+    end
     tsteps = flow_data.tsteps
     bounds = flow_data.bounds
     ncells = flow_data.ncells
@@ -280,7 +286,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
             # Nail down where this is in x and y before scattering since shock_positions is just sets of indices not actual x and y values
             x_shocks = [x[x_pos] for x_pos in xs]
             y_shocks = [y[y_pos] for y_pos in ys]
-            CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 5)
+            CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 3)
         end
     
         # Update the title with the current time step
