@@ -55,6 +55,7 @@ end
 
 function create_wave_animation_2D(flow_data::FlowData)
     #TODO: Implement this function
+    # 6 Plots??? LOL would this even make any sense or is this even useful??
 end
 
 """
@@ -165,7 +166,34 @@ function create_heatmap_evo_1D(flow_data::FlowData, field::Symbol, tube_circumfe
 end
 
 function create_heatmap_evo_2D(flow_data, field)
-    #TODO: Implement this function
+    field_data = getfield(flow_data, field)
+    tsteps = flow_data.tsteps
+    bounds = flow_data.bounds
+    ncells = flow_data.ncells
+
+    # Define the x-range
+    len_x = size(field_data, 1)
+    x = range(bounds[1][1], bounds[1][2], length=ncells[1])
+
+    # Define the y-range
+    y = range(bounds[2][1], bounds[2][2], length=ncells[2])
+
+    # Create the figure for the animation
+    fig = CairoMakie.Figure(size = (1000, 800))
+    ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
+
+    # Record the animation
+    CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
+        
+        # Extract the field data for the current time step
+        field_t = field_data[:, :, t]
+
+        # Create the heatmap and store the returned object
+        CairoMakie.heatmap!(ax, x, y, field_t)
+    
+        # Update the title with the current time step
+        ax.title = "$field Field - Time Step: $t_step"
+    end
 end
 
 function create_heatmap_evo_with_shock(flow_data::FlowData, shock_positions_over_time, field::Symbol; T= Float64)
@@ -185,7 +213,7 @@ function create_heatmap_evo_with_shock_1D(flow_data::FlowData, shock_positions_o
     tsteps = flow_data.tsteps
     bounds = flow_data.bounds
 
-    # Define the y-range
+    # Define the "fake" y-range
     y = range(0.0, tube_circumference, length=7)
 
     # Define the x-range

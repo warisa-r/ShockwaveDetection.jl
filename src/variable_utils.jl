@@ -18,23 +18,23 @@ Euler equations are typically represented in a "conserved" form, where the vecto
 
 The `u_values` parameter is a 3D array representing the conserved state variables at each point x and time t. This function iterates over each time step and calculates the primitive state vector for density, velocity, and pressure using appropriate transformations. The resulting primitive variables are stored in separate arrays `density_field`, `velocity_field`, and `pressure_field`, and returned.
 """
-function convert_to_primitive(u_values::Array{T, NAXES}, mach_to_m_s=true) where {T, NAXES}
+function convert_to_primitive(u_values::Array{T, 3}, ncells, nsteps, mach_to_m_s=true) where T
     u_prim = similar(u_values)
-    for i in 1:size(u_values, 2)
-        for j in 1:size(u_values, 3)
+    for x in 1:ncells[1]
+        for t in 1:nsteps
             # primitive_state_vector returns value without units
-            u_p_M_T = primitive_state_vector(u_values[:, i, j]; gas=DRY_AIR)
+            u_p_M_T = primitive_state_vector(u_values[:, x, t]; gas=DRY_AIR)
             p_u = pressure(u_p_M_T[1], u_p_M_T[3]; gas=DRY_AIR)
             # Store density
-            u_prim[1, i, j] = u_p_M_T[1]
+            u_prim[1, x, t] = u_p_M_T[1]
             # Convert Mach to m/s using speed_of_sound
             if mach_to_m_s
-                u_prim[2, i, j] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
+                u_prim[2, x, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
             else
-                u_prim[2, i, j] = u_p_M_T[2]
+                u_prim[2, x, t] = u_p_M_T[2]
             end
             # Strip the unit of pressure so that it can be stored in an empty array
-            u_prim[3, i, j] = ustrip(p_u)
+            u_prim[3, x, t] = ustrip(p_u)
         end
     end
 
@@ -42,5 +42,35 @@ function convert_to_primitive(u_values::Array{T, NAXES}, mach_to_m_s=true) where
     density_field = u_prim[1, :, :]
     velocity_field = u_prim[2, :, :]
     pressure_field = u_prim[3, :, :]
+    return density_field, velocity_field, pressure_field
+end
+
+#TODO: make this more efficient. Either make it shorter or thread this??
+function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s=true) where T
+    u_prim = similar(u_values)
+    for x in 1:ncells[1]
+        for y in 1:ncells[2]
+            for t in 1:nsteps
+                # primitive_state_vector returns value without units
+                u_p_M_T = primitive_state_vector(u_values[:, x, y, t]; gas=DRY_AIR)
+                p_u = pressure(u_p_M_T[1], u_p_M_T[3]; gas=DRY_AIR)
+                # Store density
+                u_prim[1, x, y, t] = u_p_M_T[1]
+                # Convert Mach to m/s using speed_of_sound
+                if mach_to_m_s
+                    u_prim[2, x, y, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
+                else
+                    u_prim[2, x, y, t] = u_p_M_T[2]
+                end
+                # Strip the unit of pressure so that it can be stored in an empty array
+                u_prim[3, x, y, t] = ustrip(p_u)
+            end
+        end
+    end
+
+    # Extract the density, velocity, and pressure fields
+    density_field = u_prim[1, :, :, :]
+    velocity_field = u_prim[2, :, :, :]
+    pressure_field = u_prim[3, :, :, :]
     return density_field, velocity_field, pressure_field
 end

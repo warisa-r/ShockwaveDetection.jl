@@ -7,7 +7,7 @@ export GradientRHShockDetectionAlgo
 export GradientEntropyShockDetectionAlgo
 export detect
 export check_shock_consistency
-export create_wave_animation, create_wave_animation_with_shock, create_tube_field_evo, create_tube_field_evo_with_shock
+export create_wave_animation, create_wave_animation_with_shock, create_heatmap_evo, create_heatmap_evo_with_shock
 
 
 include("dummy.jl")
