@@ -198,13 +198,13 @@ function create_heatmap_evo_2D(flow_data, field)
     end
 end
 
-function create_heatmap_evo_with_shock(flow_data::FlowData, shock_positions_over_time, field::Symbol; T= Float64)
+function create_heatmap_evo_with_shock(flow_data::FlowData, shock_positions_over_time, angle_estimated_over_time = [], field::Symbol = :density_field, show_normal_vector = true; T= Float64)
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
         create_heatmap_evo_with_shock_1D(flow_data, shock_positions_over_time, field)
     elseif typeof(flow_data.u) == Array{T, 4}
         # Handle the 2D flow case
-        create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, field)
+        create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time,angle_estimated_over_time, field, show_normal_vector)
     else
         error("Unsupported array dimensionality for flow_data.u")
     end
@@ -248,7 +248,7 @@ function create_heatmap_evo_with_shock_1D(flow_data::FlowData, shock_positions_o
     end
 end
 
-function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, field::Symbol)
+function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, angle_estimated_over_time, field, show_normal_vector)
     field_data = getfield(flow_data, field)
     if field_data == :velocity_field
         field_data = sqrt.(field_data[1, :, :, :].^2 + field_data[2, :, :, :].^2)
@@ -266,6 +266,10 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 800))
     ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
+
+    # Set explicit limits for the plot axes
+    CairoMakie.xlims!(ax, bounds[1][1], bounds[1][2])
+    CairoMakie.ylims!(ax, bounds[2][1], bounds[2][2])
 
     # Record the animation
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
@@ -287,6 +291,17 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
             x_shocks = [x[x_pos] for x_pos in xs]
             y_shocks = [y[y_pos] for y_pos in ys]
             CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 3)
+
+            if show_normal_vector
+                angle_estimated = angle_estimated_over_time[t]
+                # Calculate normal vectors
+                #TODO: scale the normal vectors according to the grid width (1 is a bit too large since our grids is 2.0 x 2.0)
+                normal_x = [cos(angle_estimated[x_pos, y_pos]) for (x_pos, y_pos) in zip(xs, ys)]
+                normal_y = [sin(angle_estimated[x_pos, y_pos]) for (x_pos, y_pos) in zip(xs, ys)]
+
+                # Plot normal vectors as arrows
+                CairoMakie.arrows!(ax, x_shocks, y_shocks, normal_x, normal_y, color=:red, )
+            end
         end
     
         # Update the title with the current time step
