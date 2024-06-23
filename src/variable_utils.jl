@@ -53,7 +53,7 @@ function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s
             for t in 1:nsteps
                 # primitive_state_vector returns value without units
                 u_p_M_T = primitive_state_vector(u_values[:, x, y, t]; gas=DRY_AIR)
-                p_u = pressure(u_p_M_T[1], u_p_M_T[3]; gas=DRY_AIR)
+                p_u = pressure(u_p_M_T[1], u_p_M_T[4]; gas=DRY_AIR)
                 # Store density
                 u_prim[1, x, y, t] = u_p_M_T[1]
                 # Convert Mach to m/s using speed_of_sound
