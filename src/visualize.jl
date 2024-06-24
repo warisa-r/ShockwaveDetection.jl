@@ -303,6 +303,8 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
                 CairoMakie.arrows!(ax, x_shocks, y_shocks, normal_x, normal_y, color=:red, )
             end
         end
+
+        println("Frame rendered for time step: $t_step")
     
         # Update the title with the current time step
         ax.title = "$field Field - Time Step: $t_step"

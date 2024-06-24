@@ -18,7 +18,10 @@ This package also an incomplete documentation (far from complete or acceptable)
 2. [ ] Complete the Rankine-Hugoniot condition for 1D
 3. [ ] Formulate the calculation of entropy and entropy gradient properly for gradient entropy shock detection algo
 4. [x] Develop visualization of shock position in the axis against time. Making velocity field a heat map? -> check GLMakie
-5. [ ] Process 2D data
+5. [x] Process 2D data
+6. [ ] Change that arctan thing into a vector -> make a dictionary? Change the output format of shock positions to an x y coordinate the way [DBSCAN](https://github.com/JuliaStats/Clustering.jl) can take. Take a good look at [NearestNeighbor.jl](https://github.com/KristofferC/NearestNeighbors.jl)
+7. [ ] DBSCAN test
+8. [ ] [Line fitting](https://juliapackages.com/p/curvefit)
 6. [ ] Develop a test series that aligns with the goal (probably from /examples)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
 
