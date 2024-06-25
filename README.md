@@ -16,7 +16,7 @@ This package also an incomplete documentation (far from complete or acceptable)
 1. [x] Develop 'better' methods to detect the shock
    1. [x] Make threshold a customizable fraction to be multiplied with a max gradient instead of just an unquantified number
 2. [ ] Complete the Rankine-Hugoniot condition for 1D
-3. [ ] Formulate the calculation of entropy and entropy gradient properly for gradient entropy shock detection algo
+3. [ ] Bug detected! In heatmap of velocity_field of 2D!!! Fix this!!!
 4. [x] Develop visualization of shock position in the axis against time. Making velocity field a heat map? -> check GLMakie
 5. [x] Process 2D data
 6. [ ] Change that arctan thing into a vector -> make a dictionary? Change the output format of shock positions to an x y coordinate the way [DBSCAN](https://github.com/JuliaStats/Clustering.jl) can take. Take a good look at [NearestNeighbor.jl](https://github.com/KristofferC/NearestNeighbors.jl)

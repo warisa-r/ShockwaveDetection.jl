@@ -54,8 +54,33 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, a
     # Assuming the variables are arrays or sets of indices
     high_gradient_intersection = intersect(density_sharp_gradients, velocity_sharp_gradients, pressure_sharp_gradients)
 
-    # Approximating the angle of the shock by the gradient direction
-    angle_estimated = atan.(velocity_grad_dy./velocity_grad_dx)
+    # Initialize angle_estimated with the same size and type as velocity_grad_dx and velocity_grad_dy
+    angle_estimated = similar(velocity_grad_dx)
+
+    len_velocity_grad_1 = size(velocity_grad_dx, 1)
+    len_velocity_grad_2 = size(velocity_grad_dx, 2)
+
+    # Loop through each row and column of the velocity gradient matrices
+    for i in 1:len_velocity_grad_1
+        for j in 1:len_velocity_grad_2
+            if velocity_grad_dx[i, j] == 0
+                if velocity_grad_dy[i, j] > 0
+                    angle_estimated[i, j] = π / 2
+                elseif velocity_grad_dy[i, j] < 0
+                    angle_estimated[i, j] = -π / 2
+                else #TODO: arctan(0/0), let the angle be 0 then?
+                    angle_estimated[i, j] = 0
+                end
+            else
+                # Compute the angle using atan for each element and store it in the corresponding position
+                angle_estimated[i, j] = atan(velocity_grad_dy[i, j] / velocity_grad_dx[i, j])
+                # TODO: Explaination why this works cos I'm not so sure
+                if velocity_grad_dx[i, j] > 0 && (velocity_grad_dy[i, j] > 0 || velocity_grad_dy[i, j] < 0)
+                    angle_estimated[i, j] += π
+                end
+            end
+        end
+    end
     
     # return n_shock-element Vector{CartesianIndex{2}}, and a matrix of velocity gradient angle for every position
     return high_gradient_intersection, angle_estimated
