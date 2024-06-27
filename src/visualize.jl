@@ -166,7 +166,7 @@ function create_heatmap_evo_1D(flow_data::FlowData, field::Symbol, tube_circumfe
 end
 
 function create_heatmap_evo_2D(flow_data, field)
-    if getfield(flow_data, field)== :velocity_field
+    if field == :velocity_field
         velocity_field = getfield(flow_data, field)
         velocity_field_x = velocity_field[1, :, :, :]
         velocity_field_y = velocity_field[2, :, :, :]
@@ -254,10 +254,9 @@ function create_heatmap_evo_with_shock_1D(flow_data::FlowData, shock_positions_o
 end
 
 function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, angle_estimated_over_time, field, show_normal_vector)
-    if getfield(flow_data, field)== :velocity_field
+    if field == :velocity_field
         velocity_field = getfield(flow_data, field)
         velocity_field_x = velocity_field[1, :, :, :]
-        display(velocity_field_x)
         velocity_field_y = velocity_field[2, :, :, :]
         field_data = sqrt.(velocity_field_x.^2 + velocity_field_y.^2)
     else
