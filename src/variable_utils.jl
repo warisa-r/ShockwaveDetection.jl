@@ -76,3 +76,33 @@ function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s
     pressure_field = u_prim[4, :, :, :]
     return density_field, velocity_field, pressure_field
 end
+
+"""
+    cartesian_index_to_xy(shock_positions_t, x, y) -> Matrix
+
+Converts Cartesian indices of shock positions into their corresponding x and y coordinates.
+
+# Arguments
+- `shock_positions_t`: An array of CartesianIndex indicating the positions of shocks.
+- `x`: An array representing the x-coordinates in the domain.
+- `y`: An array representing the y-coordinates in the domain.
+
+# Returns
+- `Matrix`: A 2xN matrix where the first row contains the x-coordinates and the second row contains the y-coordinates of the shock positions. The type of the elements in the matrix matches the type of elements in `x` and `y`.
+"""
+function cartesian_index_to_xy(shock_positions_t, x , y)
+    coordinate_matrix = zeros(eltype(x), 2, length(shock_positions_t))
+    # Extract x and y coordinates from CartesianIndex
+    xs = [pos[1] for pos in shock_positions_t]
+    ys = [pos[2] for pos in shock_positions_t]
+
+    # Nail down where this is in x and y before scattering since shock_positions is just sets of indices not actual x and y values
+    x_shocks = [x[x_pos] for x_pos in xs]
+    y_shocks = [y[y_pos] for y_pos in ys]
+
+    # Assign x_shocks to the first row and y_shocks to the second row of coordinate_matrix
+    coordinate_matrix[1, :] = x_shocks
+    coordinate_matrix[2, :] = y_shocks
+
+    return coordinate_matrix
+end

@@ -5,6 +5,7 @@ version = "1.0.0-DEV"
 
 [deps]
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Euler2D = "c24a2923-03cb-4692-957a-ccd31f2ad327"
 ImageFiltering = "6a3955dd-da59-5b1f-98d4-e7296123deb5"
