@@ -22,7 +22,7 @@ This package also an incomplete documentation (far from complete or acceptable)
 6. [ ] Change the output format of shock positions to an x y coordinate the way [DBSCAN](https://github.com/JuliaStats/Clustering.jl) can take. Take a good look at [NearestNeighbor.jl](https://github.com/KristofferC/NearestNeighbors.jl)
 7. What is wrong with the first frames, nothing is detected. Why is there a normal vector?
 7. [ ] DBSCAN test
-8. [ ] [Line fitting](https://juliapackages.com/p/curvefit)
+8. [ ] [LsqFit](https://github.com/JuliaNLSolvers/LsqFit.jl) seems to be a better choice due to more flexibility and more maintenance.
 9. [ ] Develop a test series that aligns with the goal (probably from /examples)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
 
