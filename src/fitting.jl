@@ -17,12 +17,12 @@ end
 
 # Parabola model function
 function parabola_model(xy, p)
-    a, x_0, y_0, theta = p
+    a, b, c = p
     x = xy[:, 1]
     y = xy[:, 2]
 
     # Return the rotated parabola model
-    return -x.*sin(theta)+ y.*cos(theta) - a .* (x.*cos(theta)+y.*sin(theta) .- x_0).^2 .+ y_0
+    return a * x.^2 .+ b * x .+ c .- y
 end
 
 function ellipse_model(xy, p)
@@ -59,9 +59,9 @@ function fit_shock_cluster(cluster)
     end
 
     xy = cluster_to_data_points(cluster)
-    models = [line_model, circle_model]
+    models = [line_model, circle_model, parabola_model]
     #TODO: better parameter initialization from boundary conditions or information about the cluster??
-    p0s = [[1.0, 1.0], [0.0, 0.0, 1.0]]  # Initial parameters for each model
+    p0s = [[1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]  # Initial parameters for each model
     
     best_fit = nothing
     least_error = Inf
@@ -101,6 +101,7 @@ function fit_shock_clusters_over_time(shock_clusters_over_time)
 end
 
 function plot_shock_line!(p, fit::Fitting, x_range)
+    # TODO: Only cut from range of x_min to x_max of the cluster coordinates
     model = fit.model
     println("Model: ", fit.model)
     params = fit.parameters
@@ -125,5 +126,4 @@ function plot_shock_lines(shock_clusters, flow_data::FlowData)
     end
 
     display(p)
-    
 end
