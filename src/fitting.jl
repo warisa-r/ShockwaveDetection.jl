@@ -1,13 +1,15 @@
 using LsqFit
 using LinearAlgebra
-using Plots
 
 struct Fitting
     model::Function
     parameters::Array{Float64}
     error::Float64
+    range::Tuple{Float64, Float64}
 end
 
+# The angle of the end point and the starting point is needed to determine the proper shape
+# For other models, only range of x suffices
 function circle_model(xy, p)
     x0, y0, r = p
     x = xy[:, 1]
@@ -25,19 +27,18 @@ function parabola_model(xy, p)
     return a * x.^2 .+ b * x .+ c .- y
 end
 
-function ellipse_model(xy, p)
-    x0, y0, a, b = p
-    x = xy[:, 1]
-    y = xy[:, 2]
-    return (x .- x0).^2 ./a.^2 + (y .- y0).^2 ./b.^2 .- 1
-end
-
 # Line model function
 function line_model(xy, p)
     m, b = p
     x = xy[:, 1]
     y = xy[:, 2]
     return m*x .+ b .- y
+end
+
+function vline_model(xy, p)
+    c = p
+    x = xy[:, 1]
+    return x .- c
 end
 
 function log_model(xy, p)
@@ -48,6 +49,7 @@ function log_model(xy, p)
 end
 
 function fit_shock_cluster(cluster)
+
     function cluster_to_data_points(shock_cluster)
         len_xy = length(shock_cluster)
         xy = zeros(len_xy, 2)
@@ -58,13 +60,21 @@ function fit_shock_cluster(cluster)
         return xy
     end
 
+
     xy = cluster_to_data_points(cluster)
-    models = [line_model, circle_model, parabola_model]
+    models = [vline_model, line_model, circle_model, parabola_model]
     #TODO: better parameter initialization from boundary conditions or information about the cluster??
-    p0s = [[1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]  # Initial parameters for each model
+    p0s = [[1.0], [1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]  # Initial parameters for each model
     
     best_fit = nothing
     least_error = Inf
+
+    function calculate_angle(center, xy)
+        x_0, y_0 = center
+        x = xy[:, 1]
+        y = xy[:, 2]
+        return atan.(y .- y_0, x .- x_0)
+    end
 
     for (i, model) in enumerate(models)
         p0 = p0s[i]
@@ -73,34 +83,59 @@ function fit_shock_cluster(cluster)
         
         if error < least_error
             least_error = error
-            best_fit = Fitting(model, fit.param, error)
+            if model == circle_model
+                # range of circle_model is in term of angle
+                # If this model fit, assume that the cluster behave well enough for the angle estimated to be accurate
+                # TODO: Is there a better way?
+                x0, y0, _ = fit.param
+                
+                angles = calculate_angle([x0, y0], xy)
+                range = (minimum(angles), maximum(angles))
+
+                # Define a tolerance for angle closeness
+                #TODO: Make this a parameter? Or fine tune this?
+                tolerance = 0.1  # Adjust as needed for your application
+                
+                # Check if the angles span a full circle within the tolerance
+                if abs(range[1]- (-pi)) < tolerance && abs(range[2] - pi) < tolerance
+                    range = (pi, -pi)  # Adjust range to explicitly represent a full circle
+                end
+            else
+                range = (minimum(xy[:, 1]), maximum(xy[:, 1]))
+            end
+            best_fit = Fitting(model, fit.param, error, range)
         end
     end
+    print(best_fit.model)
+    print(best_fit.range)
 
     return best_fit
 end
 
 function fit_shock_clusters(shock_clusters)
-    shock_lines = []
+    shock_fits = []
     if !isempty(shock_clusters)
         for shock_cluster in shock_clusters
             best_fit = fit_shock_cluster(shock_cluster)
-            push!(shock_lines, best_fit)
+            push!(shock_fits, best_fit)
         end
     end
-    return shock_lines
+    return shock_fits
 end
 
 function fit_shock_clusters_over_time(shock_clusters_over_time)
-    shock_lines_over_time = []
+    shock_fits_over_time = []
     for shock_clusters in shock_clusters_over_time
-        shock_lines = fit_shock_clusters(shock_clusters)
-        push!(shock_lines_over_time, shock_lines)
+        shock_fits = []
+        if !isempty(shock_clusters)
+            shock_fits = fit_shock_clusters(shock_clusters)
+        end
+        push!(shock_fits_over_time, shock_fits)
     end
-    return shock_lines_over_time 
+    return shock_fits_over_time 
 end
 
-function plot_shock_line!(p, fit::Fitting, x_range)
+function plot_shock_fit!(p, fit::Fitting, x_range)
     # TODO: Only cut from range of x_min to x_max of the cluster coordinates
     model = fit.model
     println("Model: ", fit.model)
@@ -112,8 +147,8 @@ function plot_shock_line!(p, fit::Fitting, x_range)
     plot!(p, x_range, y_values, label="Fitted line")
 end
 
-function plot_shock_lines(shock_clusters, flow_data::FlowData)
-    shock_lines = fit_shock_clusters(shock_clusters)
+function plot_shock_fits(shock_clusters, flow_data::FlowData)
+    shock_fits = fit_shock_clusters(shock_clusters)
     p = plot(title = "Shock Line Plot") # Add a title here
 
     bounds = flow_data.bounds
@@ -121,9 +156,9 @@ function plot_shock_lines(shock_clusters, flow_data::FlowData)
 
     x = range(bounds[1][1], stop=bounds[1][2], length=ncells[1])
 
-    for shock_line in shock_lines
-        plot_shock_line!(p, shock_line, x) # Assuming x range 1:0.1:10
+    for shock_fit in shock_fits
+        plot_shock_fit!(p, shock_fit, x) # Assuming x range 1:0.1:10
     end
 
-    display(p)
+    return p
 end

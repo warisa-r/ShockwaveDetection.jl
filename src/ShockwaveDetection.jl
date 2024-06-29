@@ -8,7 +8,7 @@ export ImageProcessingShockDetectionAlgo
 export detect
 export DBSCANAlgo
 export cluster_shock_points
-export fit_shock_clusters, plot_shock_lines
+export fit_shock_clusters, fit_shock_cluster
 export create_wave_animation, create_wave_animation_with_shock, create_heatmap_evo, create_heatmap_evo_with_shock
 
 
