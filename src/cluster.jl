@@ -19,8 +19,7 @@ function cluster_shock_points_at_t(points, dbscan_algo::DBSCANAlgo)
     for dbscan_cluster in dbscan_result.clusters
         # Each shock_cluster is a Vector{Vector{Float64}} with n-cluster size elements
         # access to each point is done by cluster[i] which will return a vector of 2 elements [x,y]
-        db_scan_indices = vcat(dbscan_cluster.core_indices, dbscan_cluster.boundary_indices)
-        shock_cluster = [points[:,i] for i in db_scan_indices]
+        shock_cluster = [points[:,i] for i in dbscan_cluster.core_indices] # Only include core points to remove noises
         push!(shock_clusters, shock_cluster)
     end
     return shock_clusters
