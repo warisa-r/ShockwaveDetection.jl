@@ -378,8 +378,12 @@ function plot_shock_clusters(shock_clusters, fits, flow_data)
     return fig
 end
 
-function plot_shock_clusters_over_time(shock_clusters_over_time, shock_fits_over_time, flow_data; T= Float64)
+function plot_shock_clusters_over_time(flow_data, detection; T=Float64)
     nsteps = flow_data.nsteps
+
+    shock_clusters_over_time = detection.shock_clusters_over_time
+    shock_fits_over_time = detection.shock_fits_over_time
+    
     if typeof(flow_data.u) == Array{T, 3}
         println("Feature doesn't support 1D case")
     else

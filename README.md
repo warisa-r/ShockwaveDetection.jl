@@ -24,6 +24,7 @@ This package also an incomplete documentation (far from complete or acceptable)
 8. [x] [LsqFit](https://github.com/JuliaNLSolvers/LsqFit.jl) seems to be a better choice due to more flexibility and more maintenance.
 9. [ ] Adapt visualization with pipeline data structure of 2D case
 10. [ ] Plot the fits in heatmaps
+12. [ ] Normal vector only on curve fits and not the scattered data points
 11. [ ] Pipeline 1D case
 12. [ ] Develop a test series that aligns with the goal (probably from /examples)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
