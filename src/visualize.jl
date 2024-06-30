@@ -363,12 +363,12 @@ function plot_shock_fits(flow_data, shock_clusters, fits, angle_estimated, show_
             end
         else
             if fit.model == circle_model
-                angles = range(fit.range[1], fit.range[2], length=100)
+                angles = range(fit.range[1], fit.range[2], length=ncells[1])
                 # Calculate x and y coordinates based on the circle equation
                 x_values = fit.parameters[1] .+ fit.parameters[3] .* cos.(angles)
                 y_values = fit.parameters[2] .+ fit.parameters[3] .* sin.(angles)
             else
-                x_values = range(fit.range[1], fit.range[2], length=ncells)
+                x_values = range(fit.range[1], fit.range[2], length=ncells[1])
                 if fit.model == line_model
                     y_values = fit.parameters[1] .+ fit.parameters[2] .* x_values
                 elseif fit.model == parabola_model
