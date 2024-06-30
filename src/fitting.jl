@@ -106,8 +106,6 @@ function fit_shock_cluster(cluster)
             best_fit = Fitting(model, fit.param, error, range)
         end
     end
-    print(best_fit.model)
-    print(best_fit.range)
 
     return best_fit
 end
@@ -133,32 +131,4 @@ function fit_shock_clusters_over_time(shock_clusters_over_time)
         push!(shock_fits_over_time, shock_fits)
     end
     return shock_fits_over_time 
-end
-
-function plot_shock_fit!(p, fit::Fitting, x_range)
-    # TODO: Only cut from range of x_min to x_max of the cluster coordinates
-    model = fit.model
-    println("Model: ", fit.model)
-    params = fit.parameters
-    println("Parameters: ", fit.parameters)
-
-    xy = hcat(x_range, zeros(length(x_range)))
-    y_values = model(xy, params)
-    plot!(p, x_range, y_values, label="Fitted line")
-end
-
-function plot_shock_fits(shock_clusters, flow_data::FlowData)
-    shock_fits = fit_shock_clusters(shock_clusters)
-    p = plot(title = "Shock Line Plot") # Add a title here
-
-    bounds = flow_data.bounds
-    ncells = flow_data.ncells
-
-    x = range(bounds[1][1], stop=bounds[1][2], length=ncells[1])
-
-    for shock_fit in shock_fits
-        plot_shock_fit!(p, shock_fit, x) # Assuming x range 1:0.1:10
-    end
-
-    return p
 end

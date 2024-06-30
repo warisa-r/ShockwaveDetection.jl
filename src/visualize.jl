@@ -321,3 +321,88 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
         ax.title = "$field Field - Time Step: $t_step"
     end
 end
+
+function plot_shock_clusters(shock_clusters, flow_data)
+    bounds = flow_data.bounds
+
+    # Create the figure for the animation
+    fig = CairoMakie.Figure(size = (1000, 800))
+    ax = CairoMakie.Axis(fig[1, 1], title = "Plot of the fitted curve")
+
+    # Set explicit limits for the plot axes
+    CairoMakie.xlims!(ax, bounds[1][1], bounds[1][2])
+    CairoMakie.ylims!(ax, bounds[2][1], bounds[2][2])
+
+    if isempty(shock_clusters)
+        return fig
+    end
+
+    for shock_cluster in shock_clusters
+        if !isempty(shock_cluster)
+            # Extract x and y coordinates
+            x_shocks = [point[1] for point in shock_cluster]
+            y_shocks = [point[2] for point in shock_cluster]
+
+            CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 3)
+        end
+    end
+
+    fits = fit_shock_clusters(shock_clusters)
+
+    if isempty(fits)
+        return fig
+    end
+
+    for fit in fits
+        if fit.model == vline_model
+            CairoMakie.vlines!(ax, fit.parameters[1], color=:blue)
+        else
+            if fit.model == circle_model
+                angles = range(fit.range[1], fit.range[2], length=100)
+                # Calculate x and y coordinates based on the circle equation
+                x_values = fit.parameters[1] .+ fit.parameters[3] .* cos.(angles)
+                y_values = fit.parameters[2] .+ fit.parameters[3] .* sin.(angles)
+            else
+                x_values = range(fit.range[1], fit.range[2], length=100)
+                if fit.model == line_model
+                    y_values = fit.parameters[1] .+ fit.parameters[2] .* x_values
+                elseif fit.model == parabola_model
+                    y_values = fit.parameters[1] .* x_values.^2 .+ fit.parameters[2] .* x_values .+ fit.parameters[3]
+                else # log model
+                    y_values = fit.parameters[1] * log.(abs.(x_values .- fit.parameters[3])) .+ fit.parameters[2]
+                end
+            end
+            CairoMakie.lines!(ax, x_values, y_values, color=:blue)
+        end
+    end
+
+    return fig
+end
+
+"""
+    plot_shock_clusters_over_time(shock_clusters_over_time, flow_data; T=Float64)
+
+Plot the shock clusters over time from the given data. Unlike other visualization function, this one plot continously over time instead of a gif object, making it fast to see the result of the detection algorithm.
+
+# Arguments
+- `shock_clusters_over_time`: An iterable collection where each element represents the shock clusters at a specific time step.
+- `flow_data`: Data structure containing the flow data. It must have a field `u` which represents the velocity field. The function checks the dimensionality of `u` to determine if the provided data is suitable for plotting.
+
+# Keyword Arguments
+- `T`: The data type of the elements in the velocity field `u`. Defaults to `Float64`.
+
+# Behavior
+- If `flow_data.u` is a 3-dimensional array of type `T`, the function prints a message indicating that 1D case plotting is not supported.
+- Otherwise, it iterates over `shock_clusters_over_time`, plotting the shock clusters for each time step using the `plot_shock_clusters` function and displays the figure.
+"""
+function plot_shock_clusters_over_time(shock_clusters_over_time, flow_data; T= Float64)
+    if typeof(flow_data.u) == Array{T, 3}
+        println("Feature doesn't support 1D case")
+    else
+        for shock_clusters_t in shock_clusters_over_time
+            fig = plot_shock_clusters(shock_clusters_t, flow_data)
+            display(fig)
+        end
+    end
+    
+end
