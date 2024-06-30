@@ -19,11 +19,13 @@ This package also an incomplete documentation (far from complete or acceptable)
 3. [ ] Bug detected! In heatmap of velocity_field of 2D!!! Fix this!!!
 4. [x] Develop visualization of shock position in the axis against time. Making velocity field a heat map? -> check GLMakie
 5. [x] Process 2D data
-6. [ ] Change the output format of shock positions to an x y coordinate the way [DBSCAN](https://github.com/JuliaStats/Clustering.jl) can take. Take a good look at [NearestNeighbor.jl](https://github.com/KristofferC/NearestNeighbors.jl)
-7. What is wrong with the first frames, nothing is detected. Why is there a normal vector?
-7. [ ] DBSCAN test
-8. [ ] [LsqFit](https://github.com/JuliaNLSolvers/LsqFit.jl) seems to be a better choice due to more flexibility and more maintenance.
-9. [ ] Develop a test series that aligns with the goal (probably from /examples)
+6. [x] Change the output format of shock positions to an x y coordinate the way [DBSCAN](https://github.com/JuliaStats/Clustering.jl) can take. Take a good look at [NearestNeighbor.jl](https://github.com/KristofferC/NearestNeighbors.jl)
+7. [x] DBSCAN test
+8. [x] [LsqFit](https://github.com/JuliaNLSolvers/LsqFit.jl) seems to be a better choice due to more flexibility and more maintenance.
+9. [ ] Adapt visualization with pipeline data structure of 2D case
+10. [ ] Plot the fits in heatmaps
+11. [ ] Pipeline 1D case
+12. [ ] Develop a test series that aligns with the goal (probably from /examples)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
 
 ## Goals: Organizational
