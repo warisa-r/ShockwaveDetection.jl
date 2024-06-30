@@ -323,6 +323,8 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
     bounds = flow_data.bounds
     ncells = flow_data.ncells
 
+    num_clusters = length(shock_clusters)
+
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 800))
     ax = CairoMakie.Axis(fig[1, 1], title = "Plot of the fitted curve")
@@ -363,12 +365,15 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
             end
         else
             if fit.model == circle_model
-                angles = range(fit.range[1], fit.range[2], length=ncells[1])
+                angles = range(fit.range[1], fit.range[2], length= round(Int, ncells[1] / num_clusters))
                 # Calculate x and y coordinates based on the circle equation
                 x_values = fit.parameters[1] .+ fit.parameters[3] .* cos.(angles)
                 y_values = fit.parameters[2] .+ fit.parameters[3] .* sin.(angles)
+                if show_normal_vector
+                    CairoMakie.arrows!(ax, x_values, y_values, cos.(angles), sin.(angles), color=:green) # Normal vector of the circle
+                end
             else
-                x_values = range(fit.range[1], fit.range[2], length=ncells[1])
+                x_values = range(fit.range[1], fit.range[2], length= round(Int, ncells[1] / num_clusters))
                 if fit.model == line_model
                     y_values = fit.parameters[1] .+ fit.parameters[2] .* x_values
                 elseif fit.model == parabola_model
@@ -376,11 +381,10 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                 else # log model
                     y_values = fit.parameters[1] * log.(abs.(x_values .- fit.parameters[3])) .+ fit.parameters[2]
                 end
-            end
-
-            if show_normal_vector
-                #TODO: Use angle_estimated_over_time to plot normal vectors along the x_values and y_values of the curve
-                #println("Normal vectors are not supported yet for this models")
+                if show_normal_vector
+                    #TODO: Plot normal vector along these fits. I dont know how yet.
+                    println("Normal vectors are not supported yet for this models")
+                end
             end
             CairoMakie.lines!(ax, x_values, y_values, color=:blue)
         end
