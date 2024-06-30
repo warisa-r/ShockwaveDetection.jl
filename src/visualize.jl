@@ -360,7 +360,7 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                 # Plot the normal vector as an arrow at the average of y-values for visibility
                 average_y = bounds[2][1] + bounds[2][2]/ 2
                 start_x = fit.parameters[1]
-                #TODO: What if shock is not moving to the right? We need to handle this case as well!
+                #TODO: What if shock is not moving to the right? We need to handle this case as well! I dont know ask Fleming
                 end_x = start_x + 1  # 1 is length of the normal vector
                 CairoMakie.arrows!(ax, [start_x], [average_y], [end_x - start_x], [0], color=:green)
             end
@@ -374,8 +374,6 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                     CairoMakie.arrows!(ax, x_values, y_values, cos.(angles), sin.(angles), color=:green) # Normal vector of the circle
                 end
             else
-                # TODO: Handle this case by defining the normal vectors as partial differentiation of the fitted curve
-                # when the equation describing the curve is f(x,y) = 0
                 x_values = range(fit.range[1], fit.range[2], length= round(Int, ncells[1] / num_clusters))
                 if fit.model == line_model
                     y_values = fit.parameters[1] .+ fit.parameters[2] .* x_values
@@ -385,7 +383,8 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                     y_values = fit.parameters[1] * log.(abs.(x_values .- fit.parameters[3])) .+ fit.parameters[2]
                 end
                 if show_normal_vector
-                    #TODO: Plot normal vector along these fits. I dont know how yet.
+                    # TODO: Handle this case by defining the normal vectors as partial differentiation of the fitted curve
+                    # when the equation describing the curve is f(x,y) = 0
                     println("Normal vectors are not supported yet for this models")
                 end
             end
@@ -396,6 +395,18 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
     return fig
 end
 
+"""
+    plot_shock_fits_over_time(flow_data, detection, show_normal_vector = false; T=Float64)
+
+Plot the shock fits over time for a given flow data and detection results. This differs from other visualization function in that it shows the shock fits and doesn't save it as gif file.
+
+# Arguments
+- `flow_data`: The flow data containing information about the flow field.
+- `detection`: An object containing the shock detection results, including shock clusters and fits over time.
+- `show_normal_vector`: A boolean flag indicating whether to show the normal vector for each shock fit. Defaults to `false`.
+- `T`: The type of the elements in the flow data's velocity field. Defaults to `Float64`.
+
+"""
 function plot_shock_fits_over_time(flow_data, detection, show_normal_vector = false; T=Float64)
     nsteps = flow_data.nsteps
 
