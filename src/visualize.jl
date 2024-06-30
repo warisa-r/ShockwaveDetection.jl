@@ -319,7 +319,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
     end
 end
 
-function plot_shock_fits(flow_data, shock_clusters, fits, angle_estimated, show_normal_vector)
+function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
     bounds = flow_data.bounds
     ncells = flow_data.ncells
 
@@ -380,7 +380,7 @@ function plot_shock_fits(flow_data, shock_clusters, fits, angle_estimated, show_
 
             if show_normal_vector
                 #TODO: Use angle_estimated_over_time to plot normal vectors along the x_values and y_values of the curve
-                println("Normal vectors are not supported yet for this models")
+                #println("Normal vectors are not supported yet for this models")
             end
             CairoMakie.lines!(ax, x_values, y_values, color=:blue)
         end
@@ -398,9 +398,8 @@ function plot_shock_fits_over_time(flow_data, detection, show_normal_vector = fa
     if typeof(flow_data.u) == Array{T, 3}
         println("Feature doesn't support 1D case")
     else
-        angles_estimated_over_time = detection.angle_estimated_over_time
         for t in 1:nsteps
-            fig = plot_shock_fits(flow_data, shock_clusters_over_time[t], shock_fits_over_time[t], angles_estimated_over_time[t], show_normal_vector)
+            fig = plot_shock_fits(flow_data, shock_clusters_over_time[t], shock_fits_over_time[t], show_normal_vector)
             display(fig)
         end
     end
