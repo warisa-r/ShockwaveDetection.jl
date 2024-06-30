@@ -322,7 +322,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
     end
 end
 
-function plot_shock_clusters(shock_clusters, flow_data)
+function plot_shock_clusters(shock_clusters, fits, flow_data)
     bounds = flow_data.bounds
 
     # Create the figure for the animation
@@ -333,6 +333,7 @@ function plot_shock_clusters(shock_clusters, flow_data)
     CairoMakie.xlims!(ax, bounds[1][1], bounds[1][2])
     CairoMakie.ylims!(ax, bounds[2][1], bounds[2][2])
 
+    # If the cluster is empty then there is also no fit to plot
     if isempty(shock_clusters)
         return fig
     end
@@ -346,8 +347,6 @@ function plot_shock_clusters(shock_clusters, flow_data)
             CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 3)
         end
     end
-
-    fits = fit_shock_clusters(shock_clusters)
 
     if isempty(fits)
         return fig
@@ -379,28 +378,13 @@ function plot_shock_clusters(shock_clusters, flow_data)
     return fig
 end
 
-"""
-    plot_shock_clusters_over_time(shock_clusters_over_time, flow_data; T=Float64)
-
-Plot the shock clusters over time from the given data. Unlike other visualization function, this one plot continously over time instead of a gif object, making it fast to see the result of the detection algorithm.
-
-# Arguments
-- `shock_clusters_over_time`: An iterable collection where each element represents the shock clusters at a specific time step.
-- `flow_data`: Data structure containing the flow data. It must have a field `u` which represents the velocity field. The function checks the dimensionality of `u` to determine if the provided data is suitable for plotting.
-
-# Keyword Arguments
-- `T`: The data type of the elements in the velocity field `u`. Defaults to `Float64`.
-
-# Behavior
-- If `flow_data.u` is a 3-dimensional array of type `T`, the function prints a message indicating that 1D case plotting is not supported.
-- Otherwise, it iterates over `shock_clusters_over_time`, plotting the shock clusters for each time step using the `plot_shock_clusters` function and displays the figure.
-"""
-function plot_shock_clusters_over_time(shock_clusters_over_time, flow_data; T= Float64)
+function plot_shock_clusters_over_time(shock_clusters_over_time, shock_fits_over_time, flow_data; T= Float64)
+    nsteps = flow_data.nsteps
     if typeof(flow_data.u) == Array{T, 3}
         println("Feature doesn't support 1D case")
     else
-        for shock_clusters_t in shock_clusters_over_time
-            fig = plot_shock_clusters(shock_clusters_t, flow_data)
+        for t in 1:nsteps
+            fig = plot_shock_clusters(shock_clusters_over_time[t], shock_fits_over_time[t], flow_data)
             display(fig)
         end
     end
