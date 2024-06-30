@@ -27,6 +27,7 @@ This package also an incomplete documentation (far from complete or acceptable)
 11. [ ] Pipeline 1D case
 12. [ ] Develop a test series that aligns with the goal (probably from /examples)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
+13. [ ] Thread everything that we can
 
 ## Goals: Organizational
 1. [ ] develop a formatting script
