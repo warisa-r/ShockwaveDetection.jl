@@ -60,7 +60,7 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, a
     return high_gradient_intersection, angle_estimated
 end
 
-function detect(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo)
+function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo)
     # Unpack all the values from the detector
     nsteps = flow_data.nsteps
     density_field = flow_data.density_field
