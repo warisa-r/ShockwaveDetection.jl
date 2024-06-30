@@ -75,9 +75,6 @@ function create_wave_animation_with_shock(flow_data::FlowData, shock_positions_o
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
         create_wave_animation_with_shock_1D(flow_data::FlowData, shock_positions_over_time)
-    elseif typeof(flow_data.u) == Array{T, 4}
-        # Handle the 2D flow case
-        create_wave_animation_with_shock_2D(flow_data::FlowData, shock_positions_over_time)
     else
         error("Unsupported array dimensionality for flow_data.u")
     end
@@ -117,10 +114,6 @@ function create_wave_animation_with_shock_1D(flow_data::FlowData, shock_position
     gif(anim, "density_velocity_pressure_over_time_with_shock_positions.gif", fps=10)
 
     return anim
-end
-
-function create_wave_animation_with_shock_2D(flow_data::FlowData, shock_positions_over_time)
-    #TODO: Implement this function
 end
 
 function create_heatmap_evo(flow_data::FlowData, field::Symbol; T = Float64)
@@ -326,7 +319,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
     end
 end
 
-function plot_shock_clusters(shock_clusters, fits, flow_data)
+function plot_shock_fits(shock_clusters, fits, flow_data)
     bounds = flow_data.bounds
 
     # Create the figure for the animation
@@ -382,7 +375,7 @@ function plot_shock_clusters(shock_clusters, fits, flow_data)
     return fig
 end
 
-function plot_shock_clusters_over_time(flow_data, detection; T=Float64)
+function plot_shock_fits_over_time(flow_data, detection; T=Float64)
     nsteps = flow_data.nsteps
 
     shock_clusters_over_time = detection.shock_clusters_over_time
@@ -392,7 +385,7 @@ function plot_shock_clusters_over_time(flow_data, detection; T=Float64)
         println("Feature doesn't support 1D case")
     else
         for t in 1:nsteps
-            fig = plot_shock_clusters(shock_clusters_over_time[t], shock_fits_over_time[t], flow_data)
+            fig = plot_shock_fits(shock_clusters_over_time[t], shock_fits_over_time[t], flow_data)
             display(fig)
         end
     end
