@@ -203,12 +203,16 @@ function create_heatmap_evo_2D(flow_data, field)
     end
 end
 
-function create_heatmap_evo_with_shock(flow_data::FlowData, shock_positions_over_time, angle_estimated_over_time = [], field::Symbol = :density_field, show_normal_vector = true; T= Float64)
+function create_heatmap_evo_with_shock(flow_data, detection, field::Symbol = :density_field, show_normal_vector = true; T= Float64)
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
+        #TODO: pipeline of detection in 1D case hasnt been implemented yet. It should contain the field shock_positions_over_time as well!
+        shock_positions_over_time = detection.shock_positions_over_time
         create_heatmap_evo_with_shock_1D(flow_data, shock_positions_over_time, field)
     elseif typeof(flow_data.u) == Array{T, 4}
         # Handle the 2D flow case
+        shock_positions_over_time = detection.shock_positions_over_time
+        angle_estimated_over_time = detection.angle_estimated
         create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time,angle_estimated_over_time, field, show_normal_vector)
     else
         error("Unsupported array dimensionality for flow_data.u")
