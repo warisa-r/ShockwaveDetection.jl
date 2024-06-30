@@ -360,6 +360,7 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                 # Plot the normal vector as an arrow at the average of y-values for visibility
                 average_y = bounds[2][1] + bounds[2][2]/ 2
                 start_x = fit.parameters[1]
+                #TODO: What if shock is not moving to the right? We need to handle this case as well!
                 end_x = start_x + 1  # 1 is length of the normal vector
                 CairoMakie.arrows!(ax, [start_x], [average_y], [end_x - start_x], [0], color=:green)
             end
@@ -373,6 +374,8 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                     CairoMakie.arrows!(ax, x_values, y_values, cos.(angles), sin.(angles), color=:green) # Normal vector of the circle
                 end
             else
+                # TODO: Handle this case by defining the normal vectors as partial differentiation of the fitted curve
+                # when the equation describing the curve is f(x,y) = 0
                 x_values = range(fit.range[1], fit.range[2], length= round(Int, ncells[1] / num_clusters))
                 if fit.model == line_model
                     y_values = fit.parameters[1] .+ fit.parameters[2] .* x_values
