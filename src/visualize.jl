@@ -308,7 +308,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
                 normal_y = [sin(angle_estimated[x_pos, y_pos]) for (x_pos, y_pos) in zip(xs, ys)]
 
                 # Plot normal vectors as arrows
-                CairoMakie.arrows!(ax, x_shocks, y_shocks, normal_x, normal_y, color=:red, )
+                CairoMakie.arrows!(ax, x_shocks, y_shocks, normal_x, normal_y, color=:red)
             end
         end
 
@@ -319,8 +319,9 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
     end
 end
 
-function plot_shock_fits(shock_clusters, fits, flow_data)
+function plot_shock_fits(flow_data, shock_clusters, fits, angle_estimated, show_normal_vector)
     bounds = flow_data.bounds
+    ncells = flow_data.ncells
 
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 800))
@@ -352,6 +353,14 @@ function plot_shock_fits(shock_clusters, fits, flow_data)
     for fit in fits
         if fit.model == vline_model
             CairoMakie.vlines!(ax, fit.parameters[1], color=:blue)
+            if show_normal_vector
+                # Calculate normal vectors
+                # Plot the normal vector as an arrow at the average of y-values for visibility
+                average_y = bounds[2][1] + bounds[2][2]/ 2
+                start_x = fit.parameters[1]
+                end_x = start_x + 1  # 1 is length of the normal vector
+                CairoMakie.arrows!(ax, [start_x], [average_y], [end_x - start_x], [0], color=:green)
+            end
         else
             if fit.model == circle_model
                 angles = range(fit.range[1], fit.range[2], length=100)
@@ -359,7 +368,7 @@ function plot_shock_fits(shock_clusters, fits, flow_data)
                 x_values = fit.parameters[1] .+ fit.parameters[3] .* cos.(angles)
                 y_values = fit.parameters[2] .+ fit.parameters[3] .* sin.(angles)
             else
-                x_values = range(fit.range[1], fit.range[2], length=100)
+                x_values = range(fit.range[1], fit.range[2], length=ncells)
                 if fit.model == line_model
                     y_values = fit.parameters[1] .+ fit.parameters[2] .* x_values
                 elseif fit.model == parabola_model
@@ -368,6 +377,11 @@ function plot_shock_fits(shock_clusters, fits, flow_data)
                     y_values = fit.parameters[1] * log.(abs.(x_values .- fit.parameters[3])) .+ fit.parameters[2]
                 end
             end
+
+            if show_normal_vector
+                #TODO: Use angle_estimated_over_time to plot normal vectors along the x_values and y_values of the curve
+                println("Normal vectors are not supported yet for this models")
+            end
             CairoMakie.lines!(ax, x_values, y_values, color=:blue)
         end
     end
@@ -375,7 +389,7 @@ function plot_shock_fits(shock_clusters, fits, flow_data)
     return fig
 end
 
-function plot_shock_fits_over_time(flow_data, detection; T=Float64)
+function plot_shock_fits_over_time(flow_data, detection, show_normal_vector = false; T=Float64)
     nsteps = flow_data.nsteps
 
     shock_clusters_over_time = detection.shock_clusters_over_time
@@ -384,8 +398,9 @@ function plot_shock_fits_over_time(flow_data, detection; T=Float64)
     if typeof(flow_data.u) == Array{T, 3}
         println("Feature doesn't support 1D case")
     else
+        angles_estimated_over_time = detection.angle_estimated_over_time
         for t in 1:nsteps
-            fig = plot_shock_fits(shock_clusters_over_time[t], shock_fits_over_time[t], flow_data)
+            fig = plot_shock_fits(flow_data, shock_clusters_over_time[t], shock_fits_over_time[t], angles_estimated_over_time[t], show_normal_vector)
             display(fig)
         end
     end
