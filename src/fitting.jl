@@ -8,6 +8,8 @@ struct Fitting
     range::Tuple{Float64, Float64}
 end
 
+#TODO: hline_model
+
 # The angle of the end point and the starting point is needed to determine the proper shape
 # For other models, only range of x suffices
 function circle_model(xy, p)
@@ -50,6 +52,7 @@ end
 
 function fit_shock_cluster(cluster)
 
+    # Helper function to convert a cluster to a matrix of data points in a form that LsqFit can use
     function cluster_to_data_points(shock_cluster)
         len_xy = length(shock_cluster)
         xy = zeros(len_xy, 2)
@@ -139,18 +142,57 @@ function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t
     bounds = flow_data.bounds
 
     if fit.model == line_model
-        m, _ = fit.parameters
+        #TODO: Check if this work! This is just pure implementation no test!
+        m, b = fit.parameters
+
+        if m == 0
+            m = 1e-6
+            #TODO: hline model
+        end
 
         # Calculate the magnitude of each vector
-        magnitudes = sqrt.(1 + m ^ 2)
+        magnitude = sqrt.(1 + m ^ 2)
 
-        # Normalize the normal vector
-        # Normal vector [1, -m] or [-1, m]? 
-        # TODO: Check the density behind and in front of the shock to determine the direction of the normal vector
-        normals_x = 1/magnitude .* ones(length(evenly_spaced_range))
-        normals_y = -m/magnitudes .* ones(length(evenly_spaced_range))
+        normal_quantity_x = 1/magnitude
+        normal_quantity_y = m/magnitude
+
+        x = range(bounds[1][1], bounds[1][2], length=ncells[1])
+        y = range(bounds[2][1], bounds[2][2], length=ncells[2])
+        
+        # Find the point in the middle of the line
+        mid_x = evenly_spaced_range[round(Int, length(evenly_spaced_range) / 2)]
+        mid_y = m * mid_x + b
+
+        # Find out the index of these points in the x and y direction
+        x_differences = abs.(x .- mid_x)
+        y_differences = abs.(y .- mid_y)
+
+        index_of_mid_x = argmin(x_differences)
+        index_of_mid_y = argmin(y_differences)
+
+        if m < 1
+            coordinate_movement_x = round(Int, 1/m)
+            coordinate_movement_y = 1
+        else
+            coordinate_movement_x = 1
+            coordinate_movement_y = round(Int, m)
+        end
+
+        density_left = density_field_t[index_of_mid_x - coordinate_movement_x, index_of_mid_y + coordinate_movement_y]
+        density_right = density_field_t[index_of_mid_x + coordinate_movement_x, index_of_mid_y - coordinate_movement_y]
+
+        # Shock is moving from left to right
+        if density_left > density_right
+            normal_quantity_x = normal_quantity_x
+            normal_quantity_y = -normal_quantity_y
+        else
+            normal_quantity_x = -normal_quantity_x
+            normal_quantity_y = normal_quantity_y
+        end
+
+        normals_x = normal_quantity_x .* ones(length(evenly_spaced_range))
+        normals_y = normal_quantity_y .* ones(length(evenly_spaced_range))
     elseif fit.model == vline_model
-        # TODO: Check the density behind and in front of the shock to determine the direction of the normal vector
         c = fit.parameters[1]
         start_x = c
         # Find where c is in the x direction
