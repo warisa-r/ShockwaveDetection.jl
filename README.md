@@ -23,11 +23,14 @@ This package also an incomplete documentation (far from complete or acceptable)
 7. [x] [LsqFit](https://github.com/JuliaNLSolvers/LsqFit.jl) seems to be a better choice due to more flexibility and more maintenance.
 8. [x] Adapt visualization with pipeline data structure of 2D case
 9. [ ] Plot the fits in heatmaps
-10. [ ] Normal vector as partial derivatives of other fits
-11. [ ] Pipeline 1D case
-12. [ ] Develop a test series that aligns with the goal (probably from /examples)
+10. [ ] Normal vector as partial derivatives of other fits: Warisa
+   1. [ ] Implement normal vector of each fits as a function?
+   2. [ ] Clean up the angle_estimated stuff
+11. [ ] Pipeline 1D case: Ina
+12. [ ] Develop a test series that aligns with the goal (probably from /examples) (TBD)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
-13. [ ] Thread everything that we can
+13. [ ] Better parameter initialization for the fits: Elena Either user customize this or some geometry magic to find the most optimal starting point.
+14. [ ] Thread everything that we can (TBD)
 
 ## Goals: Organizational
 1. [ ] develop a formatting script

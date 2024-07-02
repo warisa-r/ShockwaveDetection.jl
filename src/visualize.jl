@@ -319,7 +319,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
     end
 end
 
-function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
+function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector, t)
     bounds = flow_data.bounds
     ncells = flow_data.ncells
 
@@ -360,9 +360,10 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                 # Plot the normal vector as an arrow at the average of y-values for visibility
                 average_y = bounds[2][1] + bounds[2][2]/ 2
                 start_x = fit.parameters[1]
-                #TODO: What if shock is not moving to the right? We need to handle this case as well! I dont know ask Fleming
-                end_x = start_x + 1  # 1 is length of the normal vector
-                CairoMakie.arrows!(ax, [start_x], [average_y], [end_x - start_x], [0], color=:green)
+                # Here evenly_spaced_range vector can be an empty set because one normal vector is enough to represent
+                # the vertical line
+                normals_x , normals_y = calculate_normal_vector(fit, [], flow_data, t)
+                CairoMakie.arrows!(ax, [start_x], [average_y], normals_x, normals_y, color=:green)
             end
         else
             if fit.model == circle_model
@@ -370,6 +371,7 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                 # Calculate x and y coordinates based on the circle equation
                 x_values = fit.parameters[1] .+ fit.parameters[3] .* cos.(angles)
                 y_values = fit.parameters[2] .+ fit.parameters[3] .* sin.(angles)
+                normals_x, normals_y = calculate_normal_vector(fit, angles, flow_data, t)
                 if show_normal_vector
                     CairoMakie.arrows!(ax, x_values, y_values, cos.(angles), sin.(angles), color=:green) # Normal vector of the circle
                 end
@@ -385,7 +387,7 @@ function plot_shock_fits(flow_data, shock_clusters, fits, show_normal_vector)
                 if show_normal_vector
                     # TODO: Handle this case by defining the normal vectors as partial differentiation of the fitted curve
                     # when the equation describing the curve is f(x,y) = 0
-                    println("Normal vectors are not supported yet for this models")
+                    println("Normal vectors are not supported yet for this models, $fit.model")
                 end
             end
             CairoMakie.lines!(ax, x_values, y_values, color=:blue)
@@ -417,7 +419,7 @@ function plot_shock_fits_over_time(flow_data, detection, show_normal_vector = fa
         println("Feature doesn't support 1D case")
     else
         for t in 1:nsteps
-            fig = plot_shock_fits(flow_data, shock_clusters_over_time[t], shock_fits_over_time[t], show_normal_vector)
+            fig = plot_shock_fits(flow_data, shock_clusters_over_time[t], shock_fits_over_time[t], show_normal_vector, t)
             display(fig)
         end
     end

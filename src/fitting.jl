@@ -62,9 +62,9 @@ function fit_shock_cluster(cluster)
 
 
     xy = cluster_to_data_points(cluster)
-    models = [vline_model, line_model, circle_model, parabola_model]
+    models = [vline_model, line_model, circle_model] # Use only these three firsts
     #TODO: better parameter initialization from boundary conditions or information about the cluster??
-    p0s = [[1.0], [1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]]  # Initial parameters for each model
+    p0s = [[1.0], [1.0, 1.0], [0.0, 0.0, 1.0]]  # Initial parameters for each model
     
     best_fit = nothing
     least_error = Inf
@@ -131,4 +131,49 @@ function fit_shock_clusters_over_time(shock_clusters_over_time)
         push!(shock_fits_over_time, shock_fits)
     end
     return shock_fits_over_time 
+end
+
+function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t)
+    density_field_t = flow_data.density_field[:,:,t]
+    ncells =  flow_data.ncells
+    bounds = flow_data.bounds
+
+    if fit.model == line_model
+        m, _ = fit.parameters
+
+        # Calculate the magnitude of each vector
+        magnitudes = sqrt.(1 + m ^ 2)
+
+        # Normalize the normal vector
+        # Normal vector [1, -m] or [-1, m]? 
+        # TODO: Check the density behind and in front of the shock to determine the direction of the normal vector
+        normals_x = 1/magnitude .* ones(length(evenly_spaced_range))
+        normals_y = -m/magnitudes .* ones(length(evenly_spaced_range))
+    elseif fit.model == vline_model
+        # TODO: Check the density behind and in front of the shock to determine the direction of the normal vector
+        c = fit.parameters[1]
+        start_x = c
+        # Find where c is in the x direction
+        x = range(bounds[1][1], bounds[1][2], length=ncells[1])
+        differences = abs.(x .- c)
+        index_of_c = argmin(differences)
+
+        # Check if the density is increasing or decreasing in the x direction
+        # to identify which side is ahead of the shock (low density) and which side is behind the shock (high density)
+        if density_field_t[index_of_c-5, round(Int, ncells[2] / 2)] > density_field_t[index_of_c+5, round(Int, ncells[2] / 2)]
+            end_x = c + 1
+        else
+            end_x = c - 1
+        end
+        normals_x = [end_x - start_x]
+        normals_y = [0]
+
+    elseif fit.model == circle_model
+        angles = evenly_spaced_range
+
+        # Calculate normal vectors (outward from the circle center)
+        normals_x = cos.(angles)
+        normals_y = sin.(angles)
+    end
+    return normals_x, normals_y
 end
