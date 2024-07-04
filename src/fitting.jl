@@ -43,13 +43,6 @@ function vline_model(xy, p)
     return x .- c
 end
 
-function log_model(xy, p)
-    a, b, c = p
-    x = xy[:, 1]
-    y = xy[:, 2]
-    return a * log.(abs.(x .- c)) .+ b.- y
-end
-
 function fit_shock_cluster(cluster)
 
     # Helper function to convert a cluster to a matrix of data points in a form that LsqFit can use
@@ -65,9 +58,9 @@ function fit_shock_cluster(cluster)
 
 
     xy = cluster_to_data_points(cluster)
-    models = [vline_model, line_model, circle_model] # Use only these three firsts
+    models = [vline_model, line_model, circle_model, parabola_model] # Use only these three firsts
     #TODO: better parameter initialization from boundary conditions or information about the cluster??
-    p0s = [[1.0], [1.0, 1.0], [0.0, 0.0, 1.0]]  # Initial parameters for each model
+    p0s = [[1.0], [1.0, 1.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]]  # Initial parameters for each model
     
     best_fit = nothing
     least_error = Inf
@@ -216,6 +209,50 @@ function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t
         # Calculate normal vectors (outward from the circle center)
         normals_x = cos.(angles)
         normals_y = sin.(angles)
+    elseif fit.model == parabola_model
+        a, b, _ = fit.parameters
+        function derivative_parabola(x)
+            return 2 * a * x + b
+        end
+
+        # Initialize the array of normal vectors
+        normals_x = similar(evenly_spaced_range)
+        normals_y = similar(evenly_spaced_range)
+        
+        for (i, x) in enumerate(evenly_spaced_range)
+            # Calculate the slope of the tangent line at the point
+            slope = derivative_parabola(x)
+
+            if slope != 0
+                slope_normal = -1/slope
+                if a > 0
+                    normals_x[i] = 1/sqrt(1 + slope_normal^2)
+                    normals_y[i] = slope_normal/sqrt(1 + slope_normal^2)
+                    if x < 0
+                        # Adjust direction if on the left side of the vertex
+                        normals_x[i] = -normals_x[i]
+                        normals_y[i] = -normals_y[i]
+                    end
+                else
+                    normals_x[i] = -1/sqrt(1 + slope_normal^2)
+                    normals_y[i] = -slope_normal/sqrt(1 + slope_normal^2)
+                    if x > 0
+                        # Adjust direction if on the right side of the vertex
+                        normals_x[i] = -normals_x[i]
+                        normals_y[i] = -normals_y[i]
+                    end
+                end
+            else
+                # If the slope is zero, the normal vector is vertical
+                if a > 0
+                    normals_x[i] = 0
+                    normals_y[i] = -1
+                else
+                    normals_x[i] = 0
+                    normals_y[i] = 1
+                end
+            end
+        end
     end
     return normals_x, normals_y
 end
