@@ -53,11 +53,9 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, a
 
     # Assuming the variables are arrays or sets of indices
     high_gradient_intersection = intersect(density_sharp_gradients, velocity_sharp_gradients, pressure_sharp_gradients)
-
-    angle_estimated = atan.(- velocity_grad_dy, - velocity_grad_dx)
     
     # return n_shock-element Vector{CartesianIndex{2}}, and a matrix of velocity gradient angle for every position
-    return high_gradient_intersection, angle_estimated
+    return high_gradient_intersection
 end
 
 function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo)
@@ -67,7 +65,6 @@ function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetec
     velocity_field = flow_data.velocity_field
     pressure_field = flow_data.pressure_field
     shock_positions_over_time = []
-    angle_estimated_over_time = []
     
     for t_step in 1:nsteps
         density_field_t = density_field[:, :, t_step]
@@ -77,9 +74,8 @@ function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetec
         pressure_field_t = pressure_field[:, :, t_step]
         
         # Use the simple shock detection algorithm to detect the normal shock
-        shock_positions, angle_estimated = detect_discon_at_timestep(density_field_t, velocity_field_t, pressure_field_t, alg)
+        shock_positions= detect_discon_at_timestep(density_field_t, velocity_field_t, pressure_field_t, alg)
         push!(shock_positions_over_time, shock_positions)
-        push!(angle_estimated_over_time, angle_estimated)
     end
-    return shock_positions_over_time, angle_estimated_over_time
+    return shock_positions_over_time
 end

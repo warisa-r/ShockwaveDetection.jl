@@ -205,8 +205,8 @@ function create_heatmap_evo_with_shock(flow_data, detection, field::Symbol = :de
     elseif typeof(flow_data.u) == Array{T, 4}
         # Handle the 2D flow case
         shock_positions_over_time = detection.shock_positions_over_time
-        angle_estimated_over_time = detection.angle_estimated
-        create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time,angle_estimated_over_time, field, show_normal_vector)
+        shock_fits_over_time = detection.shock_fits_over_time
+        create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_normal_vector)
     else
         error("Unsupported array dimensionality for flow_data.u")
     end
@@ -250,7 +250,7 @@ function create_heatmap_evo_with_shock_1D(flow_data::FlowData, shock_positions_o
     end
 end
 
-function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, angle_estimated_over_time, field, show_normal_vector)
+function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_normal_vector)
     if field == :velocity_field
         velocity_field = getfield(flow_data, field)
         velocity_field_x = velocity_field[1, :, :, :]
@@ -264,6 +264,11 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
     tsteps = flow_data.tsteps
     bounds = flow_data.bounds
     ncells = flow_data.ncells
+
+    shock_clusters_over_time = detection.shock_clusters_over_time
+    shock_positions_over_time = detection.shock_positions_over_time
+    shock_fits_over_time = detection.shock_fits_over_time
+
 
     # Define the x-range
     x = range(bounds[1][1], bounds[1][2], length=ncells[1])
@@ -281,6 +286,8 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
 
     # Record the animation
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
+        shock_clusters = shock_clusters_over_time[t]
+        num_clusters = length(shock_clusters)
         
         # Extract the field data for the current time step
         field_t = field_data[:, :, t]
@@ -300,15 +307,48 @@ function create_heatmap_evo_with_shock_2D(flow_data, shock_positions_over_time, 
             y_shocks = [y[y_pos] for y_pos in ys]
             CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 3)
 
-            if show_normal_vector
-                angle_estimated = angle_estimated_over_time[t]
-                # Calculate normal vectors
-                #TODO: scale the normal vectors according to the grid width (1 is a bit too large since our grids is 2.0 x 2.0)
-                normal_x = [cos(angle_estimated[x_pos, y_pos]) for (x_pos, y_pos) in zip(xs, ys)]
-                normal_y = [sin(angle_estimated[x_pos, y_pos]) for (x_pos, y_pos) in zip(xs, ys)]
+            show_curve = true
 
-                # Plot normal vectors as arrows
-                CairoMakie.arrows!(ax, x_shocks, y_shocks, normal_x, normal_y, color=:red)
+            if show_curve
+                shock_fits = shock_fits_over_time[t]
+                for shock_fit in shock_fits
+                    if shock_fit.model == vline_model
+                        CairoMakie.vlines!(ax, shock_fit.parameters[1], color=:orange)
+                        if show_normal_vector
+                            average_y = bounds[2][1] + bounds[2][2]/ 2
+                            start_x = shock_fit.parameters[1]
+                            # Here evenly_spaced_range vector can be an empty set because one normal vector is enough to represent
+                            # the vertical line
+                            normals_x , normals_y = calculate_normal_vector(shock_fit, [], flow_data, t)
+                            CairoMakie.arrows!(ax, [start_x], [average_y], normals_x, normals_y, color=:green)
+                        end
+                    else
+                        if shock_fit.model == circle_model
+                            angles = range(shock_fit.range[1], shock_fit.range[2], length= round(Int, ncells[1] / num_clusters))
+                            # Calculate x and y coordinates based on the circle equation
+                            x_values = shock_fit.parameters[1] .+ shock_fit.parameters[3] .* cos.(angles)
+                            y_values = shock_fit.parameters[2] .+ shock_fit.parameters[3] .* sin.(angles)
+                            if show_normal_vector
+                                normals_x, normals_y = calculate_normal_vector(shock_fit, angles, flow_data, t)
+                            end
+                            
+                        else
+                            x_values = range(shock_fit.range[1], shock_fit.range[2], length= round(Int, ncells[1] / num_clusters))
+                            if shock_fit.model == line_model
+                                y_values = shock_fit.parameters[1] .+ shock_fit.parameters[2] .* x_values
+                            elseif shock_fit.model == parabola_model
+                                y_values = shock_fit.parameters[1] .* x_values.^2 .+ shock_fit.parameters[2] .* x_values .+ shock_fit.parameters[3]
+                            end
+                            if show_normal_vector
+                                normals_x, normals_y = calculate_normal_vector(shock_fit, x_values, flow_data, t)
+                            end
+                        end
+                        if show_normal_vector
+                            CairoMakie.arrows!(ax, x_values, y_values, normals_x, normals_y, color=:green) # Normal vector of the circle
+                        end
+                        CairoMakie.lines!(ax, x_values, y_values, color=:orange)
+                    end
+                end
             end
         end
 
