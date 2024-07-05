@@ -4,7 +4,7 @@ using Base.Threads
 
 export write_output
 export read_output_file, FlowData
-export convert_to_primitive, cartesian
+export convert_to_primitive, cartesian_index_to_xy
 export GradientShockDetectionAlgo
 export ImageProcessingShockDetectionAlgo
 export DBSCANAlgo
