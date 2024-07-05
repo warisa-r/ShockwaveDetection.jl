@@ -16,7 +16,7 @@ function cluster_shock_points_at_t(points, dbscan_algo::DBSCANAlgo)
     dbscan_result = dbscan(points, dbscan_algo.radius, min_neighbors = dbscan_algo.min_neighbors, min_cluster_size = dbscan_algo.min_cluster_size)
     # Initial the vector to store the clusters. This vector will have the size of the number of clusters detected in all shock_positions
     shock_clusters = [] # Sequence of the cluster doesn't matter. Pushing is thread-safe
-    for dbscan_cluster in dbscan_result.clusters
+    @threads for dbscan_cluster in dbscan_result.clusters
         # Each shock_cluster is a Vector{Vector{Float64}} with n-cluster size elements
         # access to each point is done by cluster[i] which will return a vector of 2 elements [x,y]
         shock_cluster = [points[:,i] for i in dbscan_cluster.core_indices] # Only include core points to remove noises

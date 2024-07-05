@@ -49,7 +49,7 @@ function fit_shock_cluster(cluster)
     function cluster_to_data_points(shock_cluster)
         len_xy = length(shock_cluster)
         xy = zeros(len_xy, 2)
-        for i in 1:len_xy
+        @threads for i in 1:len_xy
             xy[i, 1] = shock_cluster[i][1] # x coordinate of the shock point in the cluster
             xy[i, 2] = shock_cluster[i][2] # y coordinate of the shock point in the cluster
         end
@@ -109,7 +109,7 @@ end
 function fit_shock_clusters(shock_clusters)
     shock_fits = []
     if !isempty(shock_clusters)
-        for shock_cluster in shock_clusters # Sequence of fit doesn't matter
+        @threads for shock_cluster in shock_clusters # Sequence of fit doesn't matter
             best_fit = fit_shock_cluster(shock_cluster)
             push!(shock_fits, best_fit)
         end

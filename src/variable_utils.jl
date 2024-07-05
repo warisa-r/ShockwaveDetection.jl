@@ -20,7 +20,7 @@ The `u_values` parameter is a 3D array representing the conserved state variable
 """
 function convert_to_primitive(u_values::Array{T, 3}, ncells, nsteps, mach_to_m_s=true) where T
     u_prim = similar(u_values)
-    for x in 1:ncells[1]
+    @threads for x in 1:ncells[1]
         for t in 1:nsteps
             # primitive_state_vector returns value without units
             u_p_M_T = primitive_state_vector(u_values[:, x, t]; gas=DRY_AIR)
@@ -48,7 +48,7 @@ end
 #TODO: make this more efficient. Either make it shorter or thread this??
 function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s=true) where T
     u_prim = similar(u_values)
-    for x in 1:ncells[1]
+    @threads for x in 1:ncells[1]
         for y in 1:ncells[2]
             for t in 1:nsteps
                 # primitive_state_vector returns value without units

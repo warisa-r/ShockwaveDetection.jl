@@ -31,7 +31,7 @@ This package also an incomplete documentation (far from complete or acceptable)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
    2. [ ] Check if line with slope works or not
 13. [ ] Better parameter initialization for the fits: Elena Either user customize this or some geometry magic to find the most optimal starting point.
-14. [ ] Thread everything that we can
+14. [x] Thread everything that we can
 15. [ ] Turn the maximum finding loop into an array where parallelizable sorting algorithm can be applied
 16. [ ] hline models
 
