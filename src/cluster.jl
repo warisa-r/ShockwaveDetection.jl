@@ -39,7 +39,7 @@ function cluster_shock_points(dbscan_algo::DBSCANAlgo, shock_positions_over_time
     # Define the y-range
     y = range(bounds[2][1], bounds[2][2], length=ncells[2])
 
-    for t in 1:nsteps
+    @threads for t in 1:nsteps
         if isempty(shock_positions_over_time[t])
             # For framews where no shock is detected, push an empty vector
             shock_clusters_over_time[t] = []

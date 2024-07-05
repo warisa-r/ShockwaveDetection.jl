@@ -67,7 +67,7 @@ function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetec
     # Preallocate shock_positions_over_time with a size of nsteps, filled with undef
     shock_positions_over_time = Vector{Any}(undef, nsteps)
     
-    for t_step in 1:nsteps
+    @threads for t_step in 1:nsteps
         density_field_t = density_field[:, :, t_step]
         velocity_field_x_t = velocity_field[1, :, :, t_step]
         velocity_field_y_t = velocity_field[2, :, :, t_step]

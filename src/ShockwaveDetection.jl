@@ -1,5 +1,7 @@
 module ShockwaveDetection
 
+using Base.Threads
+
 export write_output
 export read_output_file, FlowData
 export convert_to_primitive, cartesian

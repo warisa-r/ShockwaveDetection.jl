@@ -120,7 +120,7 @@ end
 function fit_shock_clusters_over_time(shock_clusters_over_time)
     nsteps = length(shock_clusters_over_time)
     shock_fits_over_time = Vector{Any}(undef, nsteps)
-    for t in 1:nsteps
+    @threads for t in 1:nsteps
         shock_fits = []
         if !isempty(shock_clusters_over_time[t])
             shock_fits = fit_shock_clusters(shock_clusters_over_time[t])
