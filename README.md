@@ -22,7 +22,7 @@ This package also an incomplete documentation (far from complete or acceptable)
 6. [x] DBSCAN test
 7. [x] [LsqFit](https://github.com/JuliaNLSolvers/LsqFit.jl) seems to be a better choice due to more flexibility and more maintenance.
 8. [x] Adapt visualization with pipeline data structure of 2D case
-9. [ ] Plot the fits in heatmaps
+9. [x] Plot the fits in heatmaps
 10. [x] Normal vector as partial derivatives of other fits: Warisa
    1. [x] Implement normal vector of each fits as a function?
    2. [x] Clean up the angle_estimated stuff
