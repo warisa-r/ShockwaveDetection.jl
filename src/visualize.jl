@@ -196,7 +196,7 @@ function create_heatmap_evo_2D(flow_data, field)
     end
 end
 
-function create_heatmap_evo_with_shock(flow_data, detection, field::Symbol = :density_field, show_normal_vector = true; T= Float64)
+function create_heatmap_evo_with_shock(flow_data, detection, field::Symbol = :density_field, show_curve = true, show_normal_vector = true; T= Float64)
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
         #TODO: pipeline of detection in 1D case hasnt been implemented yet. It should contain the field shock_positions_over_time as well!
@@ -204,9 +204,7 @@ function create_heatmap_evo_with_shock(flow_data, detection, field::Symbol = :de
         create_heatmap_evo_with_shock_1D(flow_data, shock_positions_over_time, field)
     elseif typeof(flow_data.u) == Array{T, 4}
         # Handle the 2D flow case
-        shock_positions_over_time = detection.shock_positions_over_time
-        shock_fits_over_time = detection.shock_fits_over_time
-        create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_normal_vector)
+        create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curve, show_normal_vector)
     else
         error("Unsupported array dimensionality for flow_data.u")
     end
@@ -250,7 +248,7 @@ function create_heatmap_evo_with_shock_1D(flow_data::FlowData, shock_positions_o
     end
 end
 
-function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_normal_vector)
+function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curve, show_normal_vector)
     if field == :velocity_field
         velocity_field = getfield(flow_data, field)
         velocity_field_x = velocity_field[1, :, :, :]
@@ -284,6 +282,10 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_norm
     CairoMakie.xlims!(ax, bounds[1][1], bounds[1][2])
     CairoMakie.ylims!(ax, bounds[2][1], bounds[2][2])
 
+    if !show_curve && show_normal_vector
+        error("Cannot show normal vectors without showing the curve that they belong to!")
+    end
+
     # Record the animation
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
         shock_clusters = shock_clusters_over_time[t]
@@ -306,8 +308,6 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_norm
             x_shocks = [x[x_pos] for x_pos in xs]
             y_shocks = [y[y_pos] for y_pos in ys]
             CairoMakie.scatter!(ax, x_shocks, y_shocks, color = :red, markersize = 3)
-
-            show_curve = true
 
             if show_curve
                 shock_fits = shock_fits_over_time[t]
