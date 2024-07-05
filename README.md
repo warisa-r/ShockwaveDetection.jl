@@ -25,7 +25,7 @@ This package also an incomplete documentation (far from complete or acceptable)
 9. [ ] Plot the fits in heatmaps
 10. [x] Normal vector as partial derivatives of other fits: Warisa
    1. [x] Implement normal vector of each fits as a function?
-   2. [ ] Clean up the angle_estimated stuff
+   2. [x] Clean up the angle_estimated stuff
 11. [ ] Pipeline 1D case: Ina
 12. [ ] Develop a test series that aligns with the goal (probably from /examples) (TBD)
    1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
