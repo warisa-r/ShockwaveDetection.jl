@@ -72,6 +72,7 @@ function fit_shock_cluster(cluster)
         return atan.(y .- y_0, x .- x_0)
     end
 
+    #TODO: Instead of this kind of maximum finding, store all results in an array and use a parallelizable sorting algorithm
     for (i, model) in enumerate(models)
         p0 = p0s[i]
         fit = curve_fit(model, xy, zeros(length(cluster[:, 1])), p0)
@@ -82,7 +83,6 @@ function fit_shock_cluster(cluster)
             if model == circle_model
                 # range of circle_model is in term of angle
                 # If this model fit, assume that the cluster behave well enough for the angle estimated to be accurate
-                # TODO: Is there a better way?
                 x0, y0, _ = fit.param
                 
                 angles = calculate_angle([x0, y0], xy)
@@ -109,7 +109,7 @@ end
 function fit_shock_clusters(shock_clusters)
     shock_fits = []
     if !isempty(shock_clusters)
-        for shock_cluster in shock_clusters
+        for shock_cluster in shock_clusters # Sequence of fit doesn't matter
             best_fit = fit_shock_cluster(shock_cluster)
             push!(shock_fits, best_fit)
         end
@@ -118,13 +118,14 @@ function fit_shock_clusters(shock_clusters)
 end
 
 function fit_shock_clusters_over_time(shock_clusters_over_time)
-    shock_fits_over_time = []
-    for shock_clusters in shock_clusters_over_time
+    nsteps = length(shock_clusters_over_time)
+    shock_fits_over_time = Vector{Any}(undef, nsteps)
+    for t in 1:nsteps
         shock_fits = []
-        if !isempty(shock_clusters)
-            shock_fits = fit_shock_clusters(shock_clusters)
+        if !isempty(shock_clusters_over_time[t])
+            shock_fits = fit_shock_clusters(shock_clusters_over_time[t])
         end
-        push!(shock_fits_over_time, shock_fits)
+        shock_fits_over_time[t] = shock_fits
     end
     return shock_fits_over_time 
 end

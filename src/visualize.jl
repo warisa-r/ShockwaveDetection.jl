@@ -16,9 +16,6 @@ function create_wave_animation(flow_data::FlowData; T=Float64)
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
         create_wave_animation_1D(flow_data::FlowData)
-    elseif typeof(flow_data.u) == Array{T, 4}
-        # Handle the 2D flow case
-        create_wave_animation_2D(flow_data::FlowData)
     else
         error("Unsupported array dimensionality for flow_data.u")
     end
@@ -51,11 +48,6 @@ function create_wave_animation_1D(flow_data::FlowData)
     gif(anim, "density_velocity_pressure_over_time.gif", fps=10)
 
     return anim
-end
-
-function create_wave_animation_2D(flow_data::FlowData)
-    #TODO: Implement this function
-    # 6 Plots??? LOL would this even make any sense or is this even useful??
 end
 
 """
@@ -457,7 +449,7 @@ function plot_shock_fits_over_time(flow_data, detection, show_normal_vector = fa
     if typeof(flow_data.u) == Array{T, 3}
         println("Feature doesn't support 1D case")
     else
-        for t in 1:nsteps
+        for t in 1:nsteps # Sequence matters in display so this loop must be serialized
             fig = plot_shock_fits(flow_data, shock_clusters_over_time[t], shock_fits_over_time[t], show_normal_vector, t)
             display(fig)
         end

@@ -64,7 +64,8 @@ function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetec
     density_field = flow_data.density_field
     velocity_field = flow_data.velocity_field
     pressure_field = flow_data.pressure_field
-    shock_positions_over_time = []
+    # Preallocate shock_positions_over_time with a size of nsteps, filled with undef
+    shock_positions_over_time = Vector{Any}(undef, nsteps)
     
     for t_step in 1:nsteps
         density_field_t = density_field[:, :, t_step]
@@ -74,8 +75,7 @@ function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetec
         pressure_field_t = pressure_field[:, :, t_step]
         
         # Use the simple shock detection algorithm to detect the normal shock
-        shock_positions= detect_discon_at_timestep(density_field_t, velocity_field_t, pressure_field_t, alg)
-        push!(shock_positions_over_time, shock_positions)
+        shock_positions_over_time[t_step] = detect_discon_at_timestep(density_field_t, velocity_field_t, pressure_field_t, alg)
     end
     return shock_positions_over_time
 end
