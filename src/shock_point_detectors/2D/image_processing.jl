@@ -54,7 +54,7 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, a
     # Assuming the variables are arrays or sets of indices
     high_gradient_intersection = intersect(density_sharp_gradients, velocity_sharp_gradients, pressure_sharp_gradients)
     
-    # return n_shock-element Vector{CartesianIndex{2}}, and a matrix of velocity gradient angle for every position
+    # return n_shock-element Vector{CartesianIndex{2}}
     return high_gradient_intersection
 end
 
