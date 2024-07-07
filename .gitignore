@@ -3,3 +3,4 @@
 *.jl.mem
 examples/data/
 examples/results/
+test_plot.py
