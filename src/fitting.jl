@@ -72,7 +72,6 @@ function fit_shock_cluster(cluster)
         return atan.(y .- y_0, x .- x_0)
     end
 
-    #TODO: Instead of this kind of maximum finding, store all results in an array and use a parallelizable sorting algorithm
     for (i, model) in enumerate(models)
         p0 = p0s[i]
         fit = curve_fit(model, xy, zeros(length(cluster[:, 1])), p0)
