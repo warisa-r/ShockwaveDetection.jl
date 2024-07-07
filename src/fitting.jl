@@ -61,9 +61,6 @@ function fit_shock_cluster(cluster)
     models = [vline_model, line_model, circle_model, parabola_model] # Use only these three firsts
     #TODO: better parameter initialization from boundary conditions or information about the cluster??
     p0s = [[1.0], [1.0, 1.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]]  # Initial parameters for each model
-    
-    best_fit = nothing
-    least_error = Inf
 
     function calculate_angle(center, xy)
         x_0, y_0 = center
@@ -72,38 +69,41 @@ function fit_shock_cluster(cluster)
         return atan.(y .- y_0, x .- x_0)
     end
 
+    possible_fits = []
+
     #TODO: Instead of this kind of maximum finding, store all results in an array and use a parallelizable sorting algorithm
     for (i, model) in enumerate(models)
         p0 = p0s[i]
         fit = curve_fit(model, xy, zeros(length(cluster[:, 1])), p0)
         error = sum((fit.resid).^2)  # Calculate squared error
-        
-        if error < least_error
-            least_error = error
-            if model == circle_model
-                # range of circle_model is in term of angle
-                # If this model fit, assume that the cluster behave well enough for the angle estimated to be accurate
-                x0, y0, _ = fit.param
+        if model == circle_model
+            # range of circle_model is in term of angle
+            # If this model fit, assume that the cluster behave well enough for the angle estimated to be accurate
+            x0, y0, _ = fit.param
                 
-                angles = calculate_angle([x0, y0], xy)
-                range = (minimum(angles), maximum(angles))
+            angles = calculate_angle([x0, y0], xy)
+            range = (minimum(angles), maximum(angles))
 
-                # Define a tolerance for angle closeness
-                #TODO: Make this a parameter? Or fine tune this?
-                tolerance = 0.1  # Adjust as needed for your application
+            # Define a tolerance for angle closeness
+            #TODO: Make this a parameter? Or fine tune this?
+            tolerance = 0.1  # Adjust as needed for your application
                 
-                # Check if the angles span a full circle within the tolerance
-                if abs(range[1]- (-pi)) < tolerance && abs(range[2] - pi) < tolerance
-                    range = (pi, -pi)  # Adjust range to explicitly represent a full circle
-                end
-            else
-                range = (minimum(xy[:, 1]), maximum(xy[:, 1]))
+            # Check if the angles span a full circle within the tolerance
+            if abs(range[1]- (-pi)) < tolerance && abs(range[2] - pi) < tolerance
+                   range = (pi, -pi)  # Adjust range to explicitly represent a full circle
             end
-            best_fit = Fitting(model, fit.param, error, range)
+        else
+            range = (minimum(xy[:, 1]), maximum(xy[:, 1]))
         end
+
+        push!(possible_fits, Fitting(model, fit.param, error, range))
+
     end
 
-    return best_fit
+    # Sort the possible_fits array by the error field in ascending order
+    sort!(possible_fits, by = possible_fit -> possible_fit.error, alg=QuickSort)
+
+    return possible_fits[1] # Return the best fit (the one with the smallest error)
 end
 
 function fit_shock_clusters(shock_clusters)
