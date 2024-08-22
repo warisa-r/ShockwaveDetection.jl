@@ -41,7 +41,7 @@ function cluster_shock_points(dbscan_algo::DBSCANAlgo, shock_positions_over_time
 
     @threads for t in 1:nsteps
         if isempty(shock_positions_over_time[t])
-            # For framews where no shock is detected, push an empty vector
+            # For frames where no shock is detected, push an empty vector
             shock_clusters_over_time[t] = []
         else
             points = cartesian_index_to_xy(shock_positions_over_time[t], x, y)

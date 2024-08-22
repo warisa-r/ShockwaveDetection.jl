@@ -23,13 +23,13 @@ function convert_to_primitive(u_values::Array{T, 3}, ncells, nsteps, mach_to_m_s
     @threads for x in 1:ncells[1]
         for t in 1:nsteps
             # primitive_state_vector returns value without units
-            u_p_M_T = primitive_state_vector(u_values[:, x, t]; gas=DRY_AIR)
-            p_u = pressure(u_p_M_T[1], u_p_M_T[3]; gas=DRY_AIR)
+            u_p_M_T = primitive_state_vector(u_values[:, x, t], DRY_AIR)
+            p_u = pressure(u_p_M_T[1], u_p_M_T[3], DRY_AIR)
             # Store density
             u_prim[1, x, t] = u_p_M_T[1]
             # Convert Mach to m/s using speed_of_sound
             if mach_to_m_s
-                u_prim[2, x, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
+                u_prim[2, x, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3], DRY_AIR))
             else
                 u_prim[2, x, t] = u_p_M_T[2]
             end
@@ -52,14 +52,14 @@ function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s
         for y in 1:ncells[2]
             for t in 1:nsteps
                 # primitive_state_vector returns value without units
-                u_p_M_T = primitive_state_vector(u_values[:, x, y, t]; gas=DRY_AIR)
-                p_u = pressure(u_p_M_T[1], u_p_M_T[4]; gas=DRY_AIR)
+                u_p_M_T = primitive_state_vector(u_values[:, x, y, t], DRY_AIR)
+                p_u = pressure(u_p_M_T[1], u_p_M_T[4], DRY_AIR)
                 # Store density
                 u_prim[1, x, y, t] = u_p_M_T[1]
                 # Convert Mach to m/s using speed_of_sound
                 if mach_to_m_s
-                    u_prim[2, x, y, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
-                    u_prim[3, x, y, t] = u_p_M_T[3] * ustrip(speed_of_sound(u_p_M_T[3]; gas=DRY_AIR))
+                    u_prim[2, x, y, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3], DRY_AIR))
+                    u_prim[3, x, y, t] = u_p_M_T[3] * ustrip(speed_of_sound(u_p_M_T[3], DRY_AIR))
                 else
                     u_prim[2, x, y, t] = u_p_M_T[2]
                     u_prim[3, x, y, t] = u_p_M_T[3]

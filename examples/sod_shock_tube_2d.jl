@@ -1,7 +1,7 @@
 using ShockwaveDetection
 ENV["JULIA_NUM_THREADS"] = "4"
 
-flow_data = FlowData("examples/data/sod_shock_orb.tape", false)
+flow_data = FlowData("examples/data/sod_shock_right_2d.tape", false)
 
 point_detect_algo = ImageProcessingShockDetectionAlgo(0.5, :prewitt)
 dbscan_algo = DBSCANAlgo(0.25, 3, 10)
