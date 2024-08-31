@@ -1,6 +1,7 @@
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
-examples/data/
+examples/data/sod_shock_orb.tape
+examples/data/obstacle
 examples/results/
 test_plot.py
