@@ -1,9 +1,6 @@
 using ShockwaveDetection
 ENV["JULIA_NUM_THREADS"] = "4"
 
-# Print the current path of this file
-println("Current file path: ", @__FILE__)
-
 flow_data = FlowData("data/sod_shock_right_2d.tape", false)
 
 point_detect_algo = ImageProcessingShockDetectionAlgo(0.5, :prewitt)
