@@ -2,12 +2,15 @@ using ShockwaveDetection
 using ShockwaveProperties
 using Euler2D:Euler2D
 
-#result = Euler2D.load_cell_sim("examples/data/obstacle/circular_obstacle_radius_1.celltape")
+flow_data = FlowData("examples/data/obstacle/funky_square.celltape")
+
+#=
 using ImageFiltering
 using Statistics: mean
 
 # Sample matrix with NaN values
 matrix_with_nan = [1.0 NaN 2.0; 3.0 4.0 5.0; 6.0 7.0 8.0]
+
 
 # Function to replace NaNs with the mean of neighboring values
 function replace_nan_with_mean(matrix)
@@ -46,3 +49,4 @@ grad_dx, grad_dy = imgradients(matrix_no_nan, KernelFactors.sobel, "replicate")
 # Display the gradients
 display(grad_dx)
 display(grad_dy)
+=#

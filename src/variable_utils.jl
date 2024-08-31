@@ -1,4 +1,5 @@
 using ShockwaveProperties: primitive_state_vector, pressure, speed_of_sound, DRY_AIR
+using Euler2D: Euler2D
 using Unitful: ustrip
 
 """
@@ -75,6 +76,38 @@ function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s
     velocity_field = u_prim[2:3, :, :, :]
     pressure_field = u_prim[4, :, :, :]
     return density_field, velocity_field, pressure_field
+end
+
+function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false)
+    density_field = []
+    velocity_field = []
+    pressure_field = []
+    
+
+    for t in 1:nsteps
+        density_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.density_field(sim_data, t)]
+        pressure_t = Euler2D.pressure_field(sim_data, t, DRY_AIR)
+        velocity_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.velocity_field(sim_data, t)]
+
+       # TODO: find a way to make this work properly. Since speed of sound needs density or pressure and we have no access to temperature 
+        if mach_to_m_s
+            speed_of_sound_t = [x !== nothing ? ustrip(speed_of_sound(ustrip(x), DRY_AIR)) : NaN for x in pressure_t]
+            #velocity_t = velocity_t .* speed_of_sound_t
+        end
+
+        pressure_t = [x !== nothing ? ustrip(x) : NaN for x in pressure_t]
+
+        push!(density_field, density_t)
+        push!(pressure_field, pressure_t)
+        push!(velocity_field, velocity_t)
+    end
+
+    # Convert lists of lists into multidimensional arrays
+    density_field_array = cat(density_field..., dims=3)
+    velocity_field_array = cat(velocity_field..., dims=3)
+    pressure_field_array = cat(pressure_field..., dims=3)
+
+    return density_field_array, velocity_field_array, pressure_field_array
 end
 
 """

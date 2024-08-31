@@ -1,6 +1,6 @@
 module ShockwaveDetection
 
-using Base.Threads
+using Base.Threads: @threads
 
 export write_output
 export read_output_file, FlowData
