@@ -37,6 +37,13 @@ function line_model(xy, p)
     return m*x .+ b .- y
 end
 
+
+function hline_model(xy, p)
+    b = p
+    y = xy[:, 2]
+    return y .- b
+end
+
 function vline_model(xy, p)
     c = p
     x = xy[:, 1]
@@ -58,9 +65,9 @@ function fit_shock_cluster(cluster)
 
 
     xy = cluster_to_data_points(cluster)
-    models = [vline_model, line_model, circle_model, parabola_model] # Use only these three firsts
+    models = [vline_model, hline_model, line_model, circle_model, parabola_model] # Use only these three firsts
     #TODO: better parameter initialization from boundary conditions or information about the cluster??
-    p0s = [[1.0], [1.0, 1.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]]  # Initial parameters for each model
+    p0s = [[1.0], [1.0], [1.0, 1.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]]  # Initial parameters for each model
     
     best_fit = nothing
     least_error = Inf
@@ -202,6 +209,24 @@ function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t
         end
         normals_x = [end_x - start_x]
         normals_y = [0]
+
+    elseif fit.model == hline_model
+        b = fit.parameters[1]
+        start_y = b
+        # Find where b is in the y direction
+        y = range(bounds[2][1], bounds[2][2], length=ncells[2])
+        differences = abs.(y .- b)
+        index_of_b = argmin(differences)
+
+        # Check if the density is increasing or decreasing in the y direction
+        # to identify which side is ahead of the shock (low density) and which side is behind the shock (high density)
+        if density_field_t[round(Int, ncells[1] / 2), index_of_b-5] > density_field_t[round(Int, ncells[1] / 2), index_of_b+5]
+            end_y = b + 1
+        else
+            end_y = b - 1
+        end
+        normals_x = [0]
+        normals_y = [end_y - start_y]
 
     elseif fit.model == circle_model
         angles = evenly_spaced_range

@@ -1,4 +1,32 @@
 using Images
+using Statistics: mean
+
+# Function to replace NaNs with the mean of neighboring values for cells near obstacles and obstacles cells
+function replace_nan_with_mean!(matrix)
+    for i in 1:size(matrix, 1)
+        for j in 1:size(matrix, 2)
+            if isnan(matrix[i, j])
+                # Get the neighborhood (3x3 window) around the NaN value since the kernel size is 3x3
+                imin = max(1, i-1)
+                imax = min(size(matrix, 1), i+1)
+                jmin = max(1, j-1)
+                jmax = min(size(matrix, 2), j+1)
+                
+                # Extract the valid (non-NaN) neighbors
+                neighbors = matrix[imin:imax, jmin:jmax]
+                valid_neighbors = neighbors[.!isnan.(neighbors)]
+                
+                # Replace NaN with the mean of valid neighbors
+                if !isempty(valid_neighbors)
+                    matrix[i, j] = mean(valid_neighbors)
+                else # If all neighbors are NaN (in the obstacle zone)
+                    matrix[i, j] = 0.0
+                end
+            end
+        end
+    end
+end
+
 
 struct ImageProcessingShockDetectionAlgo <: Abstract2DShockDetectionAlgo
     threshold::Float64
@@ -58,7 +86,7 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, a
     return high_gradient_intersection
 end
 
-function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo)
+function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo, has_obstacle)
     # Unpack all the values from the detector
     nsteps = flow_data.nsteps
     density_field = flow_data.density_field
@@ -71,8 +99,16 @@ function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetec
         density_field_t = density_field[:, :, t_step]
         velocity_field_x_t = velocity_field[1, :, :, t_step]
         velocity_field_y_t = velocity_field[2, :, :, t_step]
-        velocity_field_t = sqrt.(velocity_field_x_t.^2 + velocity_field_y_t.^2)
         pressure_field_t = pressure_field[:, :, t_step]
+
+        if has_obstacle
+            replace_nan_with_mean!(density_field_t)
+            replace_nan_with_mean!(velocity_field_x_t)
+            replace_nan_with_mean!(velocity_field_y_t)
+            replace_nan_with_mean!(pressure_field_t)
+        end
+
+        velocity_field_t = sqrt.(velocity_field_x_t.^2 + velocity_field_y_t.^2) # Calculate magnitude after handling replacement of NaNs
         
         # Use the simple shock detection algorithm to detect the normal shock
         shock_positions_over_time[t_step] = detect_discon_at_timestep(density_field_t, velocity_field_t, pressure_field_t, alg)

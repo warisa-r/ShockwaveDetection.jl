@@ -4,16 +4,18 @@ using LinearAlgebra
 using ShockwaveProperties
 using Unitful
 
-struct FlowData{N, NAXES, T}
+
+struct FlowData{N, T}
     ncells::NTuple{N, Int}
     nsteps::Int
     bounds::NTuple{N, Tuple{T, T}}
     tsteps::Vector{T}
-    u::Array{T, NAXES}
-    density_field::Array{T} # Dimension NAXES-1 but Julia doesn't allow this
+    u::Union{Array{T}, Nothing} # Nothing for .celltape data since all other important data are stored in other attributes already
+    density_field::Array{T}
     velocity_field::Array{T}
     pressure_field::Array{T}
     mach_to_m_s::Bool
+    cell_ids::Union{Matrix{Int64}, Nothing}
 end
 
 
@@ -25,11 +27,21 @@ function FlowData(file_path::String, mach_to_m_s=true)
         bounds = sim_data.bounds
         tsteps = sim_data.tsteps
         u = sim_data.u
+        cell_ids = nothing
         density_field, velocity_field, pressure_field = convert_to_primitive(u, ncells, nsteps, mach_to_m_s)
+    elseif endswith(file_path, ".celltape")
+        sim_data = Euler2D.load_cell_sim(file_path)
+        ncells = sim_data.ncells
+        nsteps = sim_data.nsteps
+        bounds = sim_data.bounds
+        tsteps = sim_data.tsteps
+        cell_ids = sim_data.cell_ids
+        u = nothing
+        density_field, velocity_field, pressure_field = convert_to_primitive(sim_data, nsteps, mach_to_m_s)
     else
-        error("Unsupported file type. Please provide a .tape file.")
+        error("Unsupported file type. Please provide a .tape  or .celltape file.")
     end
-    return FlowData(ncells, nsteps, bounds, tsteps, u, density_field, velocity_field, pressure_field, mach_to_m_s)
+    return FlowData(ncells, nsteps, bounds, tsteps, u, density_field, velocity_field, pressure_field, mach_to_m_s, cell_ids)
 end
 
 # TODO: if the initial condition is given like the scripts, convert EulerSim to FlowData
