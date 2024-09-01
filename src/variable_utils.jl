@@ -104,7 +104,7 @@ function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false)
 
     # Convert lists of lists into multidimensional arrays
     density_field_array = cat(density_field..., dims=3)
-    velocity_field_array = cat(velocity_field..., dims=3)
+    velocity_field_array = cat(velocity_field..., dims=4)
     pressure_field_array = cat(pressure_field..., dims=3)
 
     return density_field_array, velocity_field_array, pressure_field_array
