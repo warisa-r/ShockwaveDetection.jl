@@ -20,6 +20,7 @@ end
     dbscan_algo = DBSCANAlgo(0.25, 3, 10)
     detection = detect(flow_data, point_detect_algo, dbscan_algo)
     plot_shock_fits_over_time(flow_data, detection, true)
+end
 
 @testset "obstacle shock detection" begin
     flow_data = FlowData(joinpath(DATA_DIR, "circular_obstacle_radius_1.celltape"), false)
