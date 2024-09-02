@@ -188,13 +188,32 @@ function create_heatmap_evo_2D(flow_data, field)
     end
 end
 
+"""
+    create_heatmap_evo_with_shock(flow_data, detection, field::Symbol = :density_field, show_curve = true, show_normal_vector = true; T=Float64)
+
+Create a heatmap evolution plot with shock detection for 1D or 2D flow data.
+
+# Arguments
+- `flow_data`: A `FlowData` object containing the flow field data.
+- `detection`: A detection object containing shock detection results.
+- `field::Symbol`: The field to visualize. Default is `:density_field`.
+- `show_curve::Bool`: Whether to show the shock curve in the plot. Default is `true`.
+- `show_normal_vector::Bool`: Whether to show the normal vector in the plot. Default is `true`.
+- `T`: The data type of the flow field. Default is `Float64`.
+
+# Description
+This function creates a heatmap evolution plot with shock detection for either 1D or 2D flow data. It determines the dimensionality of the flow data and calls the appropriate helper function to generate the plot.
+
+- For 1D flow data (`Array{T, 3}`), it calls `create_heatmap_evo_with_shock_1D`.
+- For 2D flow data (`Array{T, 4}`) or from flow data of .celltape files with obstacles, it calls `create_heatmap_evo_with_shock_2D`.
+"""
 function create_heatmap_evo_with_shock(flow_data, detection, field::Symbol = :density_field, show_curve = true, show_normal_vector = true; T= Float64)
     if typeof(flow_data.u) == Array{T, 3}
         # Handle the 1D flow case
         #TODO: pipeline of detection in 1D case hasnt been implemented yet. It should contain the field shock_positions_over_time as well!
         shock_positions_over_time = detection.shock_positions_over_time
         create_heatmap_evo_with_shock_1D(flow_data, shock_positions_over_time, field)
-    elseif typeof(flow_data.u) == Array{T, 4}
+    elseif typeof(flow_data.u) == Array{T, 4} || isnothing(flow_data.u)
         # Handle the 2D flow case
         create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curve, show_normal_vector)
     else
