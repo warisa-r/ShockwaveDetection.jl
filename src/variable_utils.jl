@@ -46,7 +46,6 @@ function convert_to_primitive(u_values::Array{T, 3}, ncells, nsteps, mach_to_m_s
     return density_field, velocity_field, pressure_field
 end
 
-#TODO: make this more efficient. Either make it shorter or thread this??
 function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s=true) where T
     u_prim = similar(u_values)
     @threads for x in 1:ncells[1]
@@ -84,7 +83,7 @@ function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false)
     pressure_field = []
     
 
-    for t in 1:nsteps
+    @threads for t in 1:nsteps
         density_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.density_field(sim_data, t)]
         pressure_t = Euler2D.pressure_field(sim_data, t, DRY_AIR)
         velocity_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.velocity_field(sim_data, t)]
