@@ -4,7 +4,7 @@ using ShockwaveProperties
 using Unitful
 using ShockwaveDetection
 
-flow_data = FlowData("examples/data/sod_shock_left_1d.tape", false)
+flow_data = FlowData("examples/data/sod_shock_left_1d.tape", false, true)
 point_detect_algo = GradientShockDetectionAlgo(0.5)
 
 detection = detect(flow_data, point_detect_algo)
