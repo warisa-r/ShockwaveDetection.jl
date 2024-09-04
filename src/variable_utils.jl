@@ -109,6 +109,11 @@ function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false)
     return density_field_array, velocity_field_array, pressure_field_array
 end
 
+function apply_noise(data::Array{T}, noise_data::NoiseData) where T
+    return data .+ noise_data.intensity * rand.(noise_data.distribution, size(data))
+end
+
+
 """
     cartesian_index_to_xy(shock_positions_t, x, y) -> Matrix
 

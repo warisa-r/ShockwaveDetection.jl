@@ -3,8 +3,13 @@ using LinearAlgebra
 using ShockwaveProperties
 using Unitful
 using ShockwaveDetection
+using Distributions
 
-flow_data = FlowData("examples/data/sod_shock_left_1d.tape", false)
+# Create a NoiseData instance
+noise_data = NoiseData(0.01, Normal(0, 1))  # 1% noise intensity, Gaussian distribution
+
+flow_data = FlowData("examples/data/sod_shock_left_1d.tape", false, noise_data)
+
 point_detect_algo = GradientShockDetectionAlgo(0.5)
 
 detection = detect(flow_data, point_detect_algo)

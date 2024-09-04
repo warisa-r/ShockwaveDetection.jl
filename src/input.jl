@@ -3,7 +3,8 @@ using Euler2D: Euler2D
 using LinearAlgebra
 using ShockwaveProperties
 using Unitful
-
+using Distributions
+export NoiseData
 
 struct FlowData{N, T}
     ncells::NTuple{N, Int}
@@ -18,8 +19,12 @@ struct FlowData{N, T}
     cell_ids::Union{Matrix{Int64}, Nothing}
 end
 
+struct NoiseData{T}
+    intensity::Float64   # The intensity of the noise
+    distribution::T  # The distribution function for generating noise
+end
 
-function FlowData(file_path::String, mach_to_m_s=true)
+function FlowData(file_path::String, mach_to_m_s=true,  noise_data::Union{Nothing, NoiseData}=nothing)
     if endswith(file_path, ".tape")
         sim_data = Euler2D.load_euler_sim(file_path)
         ncells = sim_data.ncells
@@ -38,6 +43,14 @@ function FlowData(file_path::String, mach_to_m_s=true)
         cell_ids = sim_data.cell_ids
         u = nothing
         density_field, velocity_field, pressure_field = convert_to_primitive(sim_data, nsteps, mach_to_m_s)
+
+    # Apply noise if provided
+    if noise_data !== nothing
+        density_field = apply_noise(density_field, noise_data)
+        velocity_field = apply_noise(velocity_field, noise_data)
+        pressure_field = apply_noise(pressure_field, noise_data)
+    end
+
     else
         error("Unsupported file type. Please provide a .tape  or .celltape file.")
     end
