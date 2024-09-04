@@ -20,36 +20,23 @@ Euler equations are typically represented in a "conserved" form, where the vecto
 
 The `u_values` parameter is a 3D array representing the conserved state variables at each point x and time t. This function iterates over each time step and calculates the primitive state vector for density, velocity, and pressure using appropriate transformations. The resulting primitive variables are stored in separate arrays `density_field`, `velocity_field`, and `pressure_field`, and returned.
 """
-function convert_to_primitive(u_values::Array{T, 3}, ncells, nsteps, mach_to_m_s=true, noise=true) where T
+function convert_to_primitive(u_values::Array{T, 3}, ncells, nsteps, mach_to_m_s=true) where T
     u_prim = similar(u_values)
-    noise_dist = Normal(0.0, 0.01)  # Gaussian noise with mean 0 and standard deviation as noise_level
     @threads for x in 1:ncells[1]
         for t in 1:nsteps
             # primitive_state_vector returns value without units
             u_p_M_T = primitive_state_vector(u_values[:, x, t], DRY_AIR)
             p_u = pressure(u_p_M_T[1], u_p_M_T[3], DRY_AIR)
-            # Store density with/without added Gaussian noise
-            if noise
-                u_prim[1, x, t] = u_p_M_T[1] + rand(noise_dist)
-            else
-                u_prim[1, x, t] = u_p_M_T[1]
-            end
-            # Convert Mach to m/s using speed_of_sound and add noise
+            # Store density 
+            u_prim[1, x, t] = u_p_M_T[1]
+            # Convert Mach to m/s using speed_of_sound 
             if mach_to_m_s
-                if noise
-                    u_prim[2, x, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3], DRY_AIR)) + rand(noise_dist)
-                else 
-                    u_prim[2, x, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3], DRY_AIR))
-                end
+                u_prim[2, x, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[3], DRY_AIR))
             else
-                if noise
-                    u_prim[2, x, t] = u_p_M_T[2] + rand(noise_dist)
-                else 
-                    u_prim[2, x, t] = u_p_M_T[2]
-                end
+                u_prim[2, x, t] = u_p_M_T[2]
             end
-            # Strip the unit of pressure so that it can be stored in an empty array and add noise
-            u_prim[3, x, t] = ustrip(p_u) + rand(noise_dist)
+            # Strip the unit of pressure so that it can be stored in an empty array 
+            u_prim[3, x, t] = ustrip(p_u) 
         end
     end
 
@@ -60,45 +47,26 @@ function convert_to_primitive(u_values::Array{T, 3}, ncells, nsteps, mach_to_m_s
     return density_field, velocity_field, pressure_field
 end
 
-function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s=true, noise=true) where T
+function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s=true) where T
     u_prim = similar(u_values)
-    noise_dist = Normal(0.0, 0.1)
     @threads for x in 1:ncells[1]
         for y in 1:ncells[2]
             for t in 1:nsteps
                 # primitive_state_vector returns value without units
                 u_p_M_T = primitive_state_vector(u_values[:, x, y, t], DRY_AIR)
                 p_u = pressure(u_p_M_T[1], u_p_M_T[4], DRY_AIR)
-                # Store density with/without noise
-                if noise
-                    u_prim[1, x, y, t] = u_p_M_T[1] + rand(noise_dist)
-                else 
-                    u_prim[1, x, y, t] = u_p_M_T[1]
-                end
-                # Convert Mach to m/s using speed_of_sound and add noise
+                # Store density 
+                u_prim[1, x, y, t] = u_p_M_T[1]
+                # Convert Mach to m/s using speed_of_sound 
                 if mach_to_m_s
-                    if noise
-                        u_prim[2, x, y, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[4], DRY_AIR)) + rand(noise_dist)
-                        u_prim[3, x, y, t] = u_p_M_T[3] * ustrip(speed_of_sound(u_p_M_T[4], DRY_AIR)) + rand(noise_dist)
-                    else 
-                        u_prim[2, x, y, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[4], DRY_AIR)) 
-                        u_prim[3, x, y, t] = u_p_M_T[3] * ustrip(speed_of_sound(u_p_M_T[4], DRY_AIR)) 
-                    end
+                    u_prim[2, x, y, t] = u_p_M_T[2] * ustrip(speed_of_sound(u_p_M_T[4], DRY_AIR)) 
+                    u_prim[3, x, y, t] = u_p_M_T[3] * ustrip(speed_of_sound(u_p_M_T[4], DRY_AIR)) 
                 else
-                    if noise
-                        u_prim[2, x, y, t] = u_p_M_T[2] + rand(noise_dist)
-                        u_prim[3, x, y, t] = u_p_M_T[3] + rand(noise_dist)
-                    else 
-                        u_prim[2, x, y, t] = u_p_M_T[2] 
-                        u_prim[3, x, y, t] = u_p_M_T[3] 
-                    end
+                    u_prim[2, x, y, t] = u_p_M_T[2] 
+                    u_prim[3, x, y, t] = u_p_M_T[3] 
                 end
-                # Strip the unit of pressure so that it can be stored in an empty array (and add noise)
-                if noise
-                    u_prim[4, x, y, t] = ustrip(p_u) + rand(noise_dist)
-                else 
-                    u_prim[4, x, y, t] = ustrip(p_u)
-                end
+                # Strip the unit of pressure so that it can be stored in an empty array 
+                u_prim[4, x, y, t] = ustrip(p_u)
             end
         end
     end
@@ -110,37 +78,20 @@ function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s
     return density_field, velocity_field, pressure_field
 end
 
-function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false, noise=true)
+function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false)
     density_field = []
     velocity_field = []
     pressure_field = []
     
-    noise_dist = Normal(0.0, 0.1)  # Gaussian noise with mean 0 and standard deviation as noise_level
-
     @threads for t in 1:nsteps
-        if noise 
-            density_t = [x !== nothing ? ustrip(x) + rand(noise_dist) : NaN for x in Euler2D.density_field(sim_data, t)]
-            pressure_t = Euler2D.pressure_field(sim_data, t, DRY_AIR)
-            velocity_t = [x !== nothing ? ustrip(x) + rand(noise_dist) : NaN for x in Euler2D.velocity_field(sim_data, t)]
-        else 
-            density_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.density_field(sim_data, t)]
-            pressure_t = Euler2D.pressure_field(sim_data, t, DRY_AIR)
-            velocity_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.velocity_field(sim_data, t)]
-        end
+        density_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.density_field(sim_data, t)]
+        pressure_t = Euler2D.pressure_field(sim_data, t, DRY_AIR)
+        velocity_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.velocity_field(sim_data, t)]
        # TODO: find a way to make this work properly. Since speed of sound needs density or pressure and we have no access to temperature 
         if mach_to_m_s
-            if noise 
-                speed_of_sound_t = [x !== nothing ? ustrip(speed_of_sound(ustrip(x), DRY_AIR)) + rand(noise_dist) : NaN for x in pressure_t]
-                #velocity_t = velocity_t .* speed_of_sound_t
-            else 
-                speed_of_sound_t = [x !== nothing ? ustrip(speed_of_sound(ustrip(x), DRY_AIR)) : NaN for x in pressure_t]
-            end
+            speed_of_sound_t = [x !== nothing ? ustrip(speed_of_sound(ustrip(x), DRY_AIR)) : NaN for x in pressure_t]
         end
-        if noise
-            pressure_t = [x !== nothing ? ustrip(x) + rand(noise_dist) : NaN for x in pressure_t]
-        else
             pressure_t = [x !== nothing ? ustrip(x) : NaN for x in pressure_t]
-        end
 
         push!(density_field, density_t)
         push!(pressure_field, pressure_t)
