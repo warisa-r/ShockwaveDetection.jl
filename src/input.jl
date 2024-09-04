@@ -17,6 +17,7 @@ struct FlowData{N, T}
     pressure_field::Array{T}
     mach_to_m_s::Bool
     cell_ids::Union{Matrix{Int64}, Nothing}
+    noise::Bool
 end
 
 struct NoiseData{T}
@@ -33,7 +34,7 @@ function FlowData(file_path::String, mach_to_m_s=true,  noise_data::Union{Nothin
         tsteps = sim_data.tsteps
         u = sim_data.u
         cell_ids = nothing
-        density_field, velocity_field, pressure_field = convert_to_primitive(u, ncells, nsteps, mach_to_m_s)
+        density_field, velocity_field, pressure_field = convert_to_primitive(u, ncells, nsteps, mach_to_m_s, noise)
     elseif endswith(file_path, ".celltape")
         sim_data = Euler2D.load_cell_sim(file_path)
         ncells = sim_data.ncells
@@ -54,7 +55,7 @@ function FlowData(file_path::String, mach_to_m_s=true,  noise_data::Union{Nothin
     else
         error("Unsupported file type. Please provide a .tape  or .celltape file.")
     end
-    return FlowData(ncells, nsteps, bounds, tsteps, u, density_field, velocity_field, pressure_field, mach_to_m_s, cell_ids)
+    return FlowData(ncells, nsteps, bounds, tsteps, u, density_field, velocity_field, pressure_field, mach_to_m_s, cell_ids, noise)
 end
 
 # TODO: if the initial condition is given like the scripts, convert EulerSim to FlowData
