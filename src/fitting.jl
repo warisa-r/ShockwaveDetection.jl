@@ -123,13 +123,13 @@ function fit_shock_clusters(shock_clusters)
     return shock_fits
 end
 
-function fit_shock_clusters_over_time(shock_clusters_over_time)
+function fit_shock_clusters_over_time(shock_clusters_over_time::Vector{Any}, make_initial_guess::Bool)
     nsteps = length(shock_clusters_over_time)
     shock_fits_over_time = Vector{Any}(undef, nsteps)
     @threads for t in 1:nsteps
         shock_fits = []
         if !isempty(shock_clusters_over_time[t])
-            shock_fits = fit_shock_clusters(shock_clusters_over_time[t])
+            shock_fits = fit_shock_clusters(shock_clusters_over_time[t], make_initial_guess)
         end
         shock_fits_over_time[t] = shock_fits
     end
