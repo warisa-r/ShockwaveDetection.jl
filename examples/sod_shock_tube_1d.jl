@@ -3,7 +3,6 @@ using LinearAlgebra
 using ShockwaveProperties
 using Unitful
 using ShockwaveDetection
-using Distributions
 
 # Create a NoiseData instance
 #noise_data = NoiseData(0.01, Normal(0, 1))  # 1% noise intensity, Gaussian distribution
