@@ -14,6 +14,14 @@ end
     rm("density_velocity_pressure_over_time_with_shock_positions.gif")
 end
 
+@testset "1D supersonic shock detection" begin
+    flow_data = FlowData(joinpath(DATA_DIR, "supersonic_shock_2.tape"), false)
+    point_detect_algo = GradientShockDetectionAlgo(0.2)
+    detection = detect(flow_data, point_detect_algo)
+    anim  = create_wave_animation_with_shock(flow_data, detection)
+    rm("density_velocity_pressure_over_time_with_shock_positions.gif")
+end
+
 @testset "2D shock detection" begin
     flow_data = FlowData(joinpath(DATA_DIR, "sod_shock_right_2d.tape"), false)
     point_detect_algo = ImageProcessingShockDetectionAlgo(0.5, :prewitt)
