@@ -8,7 +8,7 @@ struct Fitting
     range::Tuple{Float64, Float64}
 end
 
-#TODO: hline_model
+#TODO: hline_modelsh
 
 # Circle model function
 function circle_model(xy, p)
