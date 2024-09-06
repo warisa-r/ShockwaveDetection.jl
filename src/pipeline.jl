@@ -10,7 +10,6 @@ struct ShockDetectionResult1D <: AbstractShockDetectionResult
     shock_positions_over_time::Vector{Any}
 end
 
-# Pipeline for 2D shock detection
 """
     detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo)
 
