@@ -2,8 +2,8 @@ using ShockwaveDetection
 using ShockwaveProperties
 using Euler2D:Euler2D
 
-flow_data = FlowData("examples/data/obstacle/circular_obstacle_radius_1.celltape")
-point_detect_algo = ImageProcessingShockDetectionAlgo(0.2, :prewitt)
+flow_data = FlowData("examples/data/obstacle/funky_square.celltape")
+point_detect_algo = ImageProcessingShockDetectionAlgo(0.05, :prewitt)
 dbscan_algo = DBSCANAlgo(0.25, 3, 10)
 
 detection = detect(flow_data, point_detect_algo, dbscan_algo)

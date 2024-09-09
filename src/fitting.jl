@@ -123,6 +123,18 @@ function fit_shock_clusters(shock_clusters)
     return shock_fits
 end
 
+"""
+    fit_shock_clusters_over_time(shock_clusters_over_time)
+
+A part of the 2D pipeline of `detect`. In each time frame which is stored in the array `shock_clusters_over_time`, this function fits the shock clusters to existing models of parametized curves using the `fit_shock_clusters` function. 
+The fitted shock clusters are stored in the array `shock_fits_over_time`.
+
+# Arguments
+- `shock_clusters_over_time`: An array of shock clusters over time.
+
+# Returns
+- `shock_fits_over_time`: An array of fitted shock clusters over time.
+"""
 function fit_shock_clusters_over_time(shock_clusters_over_time)
     nsteps = length(shock_clusters_over_time)
     shock_fits_over_time = Vector{Any}(undef, nsteps)

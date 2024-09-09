@@ -65,10 +65,10 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, a
     pressure_gradient_magnitudes = sqrt.(pressure_grad_dx.^2 + pressure_grad_dy.^2)
 
     # Find maximum gradient magnitudes
-    max_density_gradient_magnitude = maximum(density_gradient_magnitudes)
-    max_velocity_gradient_magnitude = maximum(velocity_gradient_magnitudes)
-    max_pressure_gradient_magnitude = maximum(pressure_gradient_magnitudes)
-
+    max_density_gradient_magnitude = maximum(x->isnan(x) ? -Inf : x,density_gradient_magnitudes)
+    max_velocity_gradient_magnitude = maximum(x->isnan(x) ? -Inf : x,velocity_gradient_magnitudes)
+    max_pressure_gradient_magnitude = maximum(x->isnan(x) ? -Inf : x,pressure_gradient_magnitudes)
+    
     # Scale the maximum values to use as thresholds
     density_threshold = max_density_gradient_magnitude * threshold
     velocity_threshold = max_velocity_gradient_magnitude * threshold
@@ -100,13 +100,6 @@ function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetec
         velocity_field_x_t = velocity_field[1, :, :, t_step]
         velocity_field_y_t = velocity_field[2, :, :, t_step]
         pressure_field_t = pressure_field[:, :, t_step]
-
-        if has_obstacle
-            replace_nan_with_mean!(density_field_t)
-            replace_nan_with_mean!(velocity_field_x_t)
-            replace_nan_with_mean!(velocity_field_y_t)
-            replace_nan_with_mean!(pressure_field_t)
-        end
 
         velocity_field_t = sqrt.(velocity_field_x_t.^2 + velocity_field_y_t.^2) # Calculate magnitude after handling replacement of NaNs
         

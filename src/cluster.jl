@@ -25,6 +25,22 @@ function cluster_shock_points_at_t(points, dbscan_algo::DBSCANAlgo)
     return shock_clusters
 end
 
+"""
+    cluster_shock_points(dbscan_algo::DBSCANAlgo, shock_positions_over_time, flow_data)
+
+A part of the 2D detection algorithm of function `detect`. This function clusters shock points over time using the DBSCAN algorithm.
+
+# Arguments
+- `dbscan_algo::DBSCANAlgo`: An instance of the DBSCAN clustering algorithm.
+- `shock_positions_over_time`: A vector containing shock positions for each time step.
+- `flow_data`: A `FlowData` object containing the flow field data.
+
+# Returns
+- `shock_clusters_over_time`: A vector containing clustered shock points for each time step.
+
+# Description
+This function clusters shock points over time using the DBSCAN algorithm. It iterates over each time step, converts shock positions to Cartesian coordinates, and applies the DBSCAN algorithm to cluster the shock points. The clustered shock points are stored in a vector, with each element corresponding to a time step.
+"""
 function cluster_shock_points(dbscan_algo::DBSCANAlgo, shock_positions_over_time, flow_data)
     bounds = flow_data.bounds
     ncells = flow_data.ncells
