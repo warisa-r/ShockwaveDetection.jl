@@ -1,3 +1,5 @@
+using TimerOutputs
+
 abstract type AbstractShockDetectionResult end
 
 struct ShockDetectionResult2D <: AbstractShockDetectionResult
@@ -13,7 +15,7 @@ end
 """
     detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo)
 
-Detects shocks in 2D flow data, clusters the shockpoints and applies fitting to the cluster.
+Detects shocks in 2D flow data, clusters the shockpoints and applies fitting to the cluster. It also shows the runtime and memory allocations required in each subprocess
 
 # Arguments
 - `flow_data::FlowData`: A `FlowData` object containing the 2D flow field data.
@@ -30,10 +32,23 @@ Detects shocks in 2D flow data, clusters the shockpoints and applies fitting to 
 This function detects shock points in 2D flow data using a specified shock detection algorithm. Detected shock points are clustered using the provided `DBSCANAlgo`, and then the clusters are fitted to create a smooth representation of the shock over time.
 """
 function detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo)
+    to = TimerOutput()
+    
     has_obstacle = isnothing(flow_data.u)  # Check if the flow data has an obstacle
-    shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo, has_obstacle)
-    shock_clusters_over_time = cluster_shock_points(cluster_algo, shock_positions_over_time, flow_data)
-    shock_fits_over_time = fit_shock_clusters_over_time(shock_clusters_over_time)
+    
+    @timeit to "Detect Shock Points(2D)" begin
+        shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo, has_obstacle)
+    end
+    
+    @timeit to "Cluster Shock Points" begin
+        shock_clusters_over_time = cluster_shock_points(cluster_algo, shock_positions_over_time, flow_data)
+    end
+    
+    @timeit to "Fit Shock Clusters" begin
+        shock_fits_over_time = fit_shock_clusters_over_time(shock_clusters_over_time)
+    end
+    
+    show(to, sortby = :firstexec)
     
     return ShockDetectionResult2D(shock_positions_over_time, shock_clusters_over_time, shock_fits_over_time)
 end
@@ -41,7 +56,7 @@ end
 """
     detect(flow_data::FlowData, shock_point_algo::Abstract1DShockDetectionAlgo)
 
-Detects shocks in 1D flow data.
+Detects shocks in 1D flow data and show the runtime and memory allocations required in each subprocess.
 
 # Arguments
 - `flow_data::FlowData`: A `FlowData` object containing the 1D flow field data.
@@ -55,8 +70,15 @@ Detects shocks in 1D flow data.
 This function detects shock points in 1D flow data using a specified shock detection algorithm. 
 """
 function detect(flow_data::FlowData, shock_point_algo::Abstract1DShockDetectionAlgo)
+    to = TimerOutput()
+
     has_obstacle = isnothing(flow_data.u)  # Check if the flow data has an obstacle
-    shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo, has_obstacle)
+
+    @timeit to "Detect Shock Points (1D)" begin
+        shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo, has_obstacle)
+    end
+
+    show(to, sortby = :firstexec)
     
     return ShockDetectionResult1D(shock_positions_over_time)
 end
