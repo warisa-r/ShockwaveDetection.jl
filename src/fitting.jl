@@ -66,8 +66,8 @@ function fit_shock_cluster(cluster)
 
     xy = cluster_to_data_points(cluster)
     models = [vline_model, hline_model, line_model, circle_model, parabola_model] # Use only these three firsts
-    #TODO: better parameter initialization from boundary conditions or information about the cluster??
-    p0s = [[1.0], [1.0], [1.0, 1.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]]  # Initial parameters for each model
+    #TODO: make user choose between interpolation guess or random guess
+    p0s = [rand(1), rand(1), rand(2), rand(3), rand(3)]  # Initial parameters for each model
     
     best_fit = nothing
     least_error = Inf
