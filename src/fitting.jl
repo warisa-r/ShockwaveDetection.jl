@@ -148,6 +148,29 @@ function fit_shock_clusters_over_time(shock_clusters_over_time)
     return shock_fits_over_time 
 end
 
+"""
+    calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t)
+
+Calculate the normal vector to a fitted line model at a specific time step in the flow data.
+
+# Arguments
+- `fit::Fitting`: The fitting object containing the model and parameters of the fitted line.
+- `evenly_spaced_range`: A range of evenly spaced points along the x-axis.
+- `flow_data`: The flow data object containing the density field, number of cells, and bounds.
+- `t`: The specific time step at which to calculate the normal vector.
+
+# Returns
+- `normal_quantity_x`: The x-component of the normal vector.
+- `normal_quantity_y`: The y-component of the normal vector.
+- `index_of_mid_x`: The index of the midpoint in the x-direction.
+- `index_of_mid_y`: The index of the midpoint in the y-direction.
+- `coordinate_movement_x`: The movement in the x-direction based on the slope.
+- `coordinate_movement_y`: The movement in the y-direction based on the slope.
+
+# Description
+This function calculates the normal vector to a fitted line model at a specific time step in the flow data. It first extracts the density field at the given time step and retrieves the number of cells and bounds from the flow data. If the model is a line model, it calculates the slope (`m`) and intercept (`b`) from the fit parameters. The magnitude of the normal vector is computed, and the x and y components of the normal vector are determined. The function then finds the midpoint of the line and its corresponding indices in the x and y directions. Finally, it calculates the coordinate movements based on the slope.
+This function is called within the `create_wave_animation_with_shock` function to calculate the normal vectors for the fitted shock models.
+"""
 function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t)
     density_field_t = flow_data.density_field[:,:,t]
     ncells =  flow_data.ncells
@@ -156,11 +179,6 @@ function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t
     if fit.model == line_model
         #TODO: Check if this work! This is just pure implementation no test!
         m, b = fit.parameters
-
-        if m == 0
-            m = 1e-6
-            #TODO: hline model
-        end
 
         # Calculate the magnitude of each vector
         magnitude = sqrt.(1 + m ^ 2)
