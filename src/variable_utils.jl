@@ -77,7 +77,7 @@ function convert_to_primitive(u_values::Array{T, 4}, ncells, nsteps, mach_to_m_s
     return density_field, velocity_field, pressure_field
 end
 
-function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false)
+function convert_to_primitive(sim_data, nsteps)
     density_field = []
     velocity_field = []
     pressure_field = []
@@ -87,13 +87,6 @@ function convert_to_primitive(sim_data, nsteps, mach_to_m_s=false)
         density_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.density_field(sim_data, t)]
         pressure_t = Euler2D.pressure_field(sim_data, t, DRY_AIR)
         velocity_t = [x !== nothing ? ustrip(x) : NaN for x in Euler2D.velocity_field(sim_data, t)]
-
-       # TODO: find a way to make this work properly. Since speed of sound needs density or pressure and we have no access to temperature 
-        if mach_to_m_s
-            speed_of_sound_t = [x !== nothing ? ustrip(speed_of_sound(ustrip(x), DRY_AIR)) : NaN for x in pressure_t]
-            #velocity_t = velocity_t .* speed_of_sound_t
-        end
-
         pressure_t = [x !== nothing ? ustrip(x) : NaN for x in pressure_t]
 
         push!(density_field, density_t)

@@ -169,7 +169,7 @@ Calculate the normal vector to a fitted line model at a specific time step in th
 
 # Description
 This function calculates the normal vector to a fitted line model at a specific time step in the flow data. It first extracts the density field at the given time step and retrieves the number of cells and bounds from the flow data. If the model is a line model, it calculates the slope (`m`) and intercept (`b`) from the fit parameters. The magnitude of the normal vector is computed, and the x and y components of the normal vector are determined. The function then finds the midpoint of the line and its corresponding indices in the x and y directions. Finally, it calculates the coordinate movements based on the slope.
-This function is called within the `create_wave_animation_with_shock` function to calculate the normal vectors for the fitted shock models.
+This function is called within the `create_heatmap_evo_with_shock` function to calculate the normal vectors for the fitted shock models.
 """
 function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t)
     density_field_t = flow_data.density_field[:,:,t]

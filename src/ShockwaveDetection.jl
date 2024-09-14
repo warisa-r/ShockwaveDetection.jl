@@ -18,7 +18,6 @@ include("input.jl")
 include("variable_utils.jl")
 include("shock_point_detectors/1D/shock_algorithms_1D.jl") # Maybe write one files that includes all the files in the shock_detectors folder?
 include("shock_point_detectors/2D/shock_algorithms_2D.jl")
-include("shock_analysis/normal_shock_analysis.jl")
 include("cluster.jl")
 include("fitting.jl")
 include("visualize.jl")

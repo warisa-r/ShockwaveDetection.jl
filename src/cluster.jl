@@ -1,6 +1,22 @@
 using Clustering
 
-# a struct that keeps all the necessary parameters for the dbscan_algo algorithm
+"""
+    struct DBSCANAlgo
+
+A structure that keeps all the necessary parameters for the DBSCAN clustering algorithm.
+
+# Fields
+- `radius::Float64`: The radius within which to search for neighboring points.
+- `min_neighbors::Int`: The minimum number of neighbors required to form a dense region.
+- `min_cluster_size::Int`: The minimum number of points required to form a cluster.
+
+# Constructors
+- `DBSCANAlgo(radius::Float64 = 0.5, min_neighbors::Int = 3, min_cluster_size::Int = 10)`: 
+  Creates a new `DBSCANAlgo` instance with the specified parameters. Default values are provided for all parameters.
+
+# Example
+algo = DBSCANAlgo(radius=1.0, min_neighbors=5, min_cluster_size=15)
+"""
 struct DBSCANAlgo
     radius::Float64
     min_neighbors::Int

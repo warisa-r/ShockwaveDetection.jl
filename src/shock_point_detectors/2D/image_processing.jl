@@ -27,7 +27,21 @@ function replace_nan_with_mean!(matrix)
     end
 end
 
+"""
+    struct ImageProcessingShockDetectionAlgo <: Abstract2DShockDetectionAlgo
 
+A structure that represents the image processing shock detection algorithm.
+
+# Fields
+- `threshold::Float64`: The threshold value for detecting shocks.
+- `kernelname::Symbol`: The name of the kernel to be used for image processing (e.g., `:sobel`, `:prewitt`).
+
+# Description
+This struct is used to configure the image processing shock detection algorithm. The algorithm uses a specified kernel to process the image and detect shocks based on the provided threshold value.
+
+# Example
+algo = ImageProcessingShockDetectionAlgo(threshold=0.5, kernelname=:sobel)
+"""
 struct ImageProcessingShockDetectionAlgo <: Abstract2DShockDetectionAlgo
     threshold::Float64
     kernelname::Symbol

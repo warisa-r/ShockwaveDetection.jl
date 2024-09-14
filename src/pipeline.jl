@@ -2,6 +2,19 @@ using TimerOutputs
 
 abstract type AbstractShockDetectionResult end
 
+"""
+    struct ShockDetectionResult2D <: AbstractShockDetectionResult
+
+A structure to hold the results of 2D shock detection.
+
+# Fields
+- `shock_positions_over_time::Vector{Any}`: A vector of the CartesianIndices of shock points detected in every time frame.
+- `shock_clusters_over_time::Vector{Any}`: A vector of groups of clustered shock points detected in every time frame.
+- `shock_fits_over_time::Vector{Any}`: Fitted shock curves over time. In each time frame is a vector of objects `Fitting`
+
+# Description
+This structure is used to store the results of shock detection in 2D flow data. It contains the detected shock points, clusters of shock points, and fitted shock curves over time.
+"""
 struct ShockDetectionResult2D <: AbstractShockDetectionResult
     shock_positions_over_time::Vector{Any}
     shock_clusters_over_time::Vector{Any}
