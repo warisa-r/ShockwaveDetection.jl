@@ -9,7 +9,7 @@ export GradientShockDetectionAlgo
 export ImageProcessingShockDetectionAlgo
 export DBSCANAlgo
 export cluster_shock_points
-export fit_shock_clusters_over_time, calculate_normal_vector
+export FittingAlgo, fit_shock_clusters_over_time, calculate_normal_vector
 export create_wave_animation, create_wave_animation_with_shock, create_heatmap_evo, create_heatmap_evo_with_shock, plot_shock_fits_over_time
 export ShockDetectionResult2D, detect
 export ShockDetectionResult1D, detect

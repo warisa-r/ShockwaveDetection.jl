@@ -7,6 +7,7 @@ ENV["JULIA_NUM_THREADS"] = "4"
 flow_data = FlowData("examples/data/obstacle/funky_square.celltape")
 point_detect_algo = ImageProcessingShockDetectionAlgo(0.2, :prewitt)
 dbscan_algo = DBSCANAlgo(0.25, 50, 40)
+fitting_algo = FittingAlgo(0.1, false)
 
 # Square case
 # What seems to be happening in the first frame is that
@@ -17,7 +18,7 @@ dbscan_algo = DBSCANAlgo(0.25, 50, 40)
 # Decreasing the gradient threshold will increase the shock detects at the edges of the obstacle, making it harder to seperate
 # both moving shocks and a line will still be fitted, despite the algorithm having detected more "tail" of the shock
 
-detection = detect(flow_data, point_detect_algo, dbscan_algo)
+detection = detect(flow_data, point_detect_algo, dbscan_algo, fitting_algo)
 
 #plot_shock_fits_over_time(flow_data, detection, false)
-#create_heatmap_evo_with_shock(flow_data, detection, :density_field, true, true)
+create_heatmap_evo_with_shock(flow_data, detection, :density_field, true, true)

@@ -1,6 +1,31 @@
 using LsqFit
 using LinearAlgebra
 
+"""
+    struct FittingAlgo{T}
+
+A structure that represents the fitting algorithm configuration.
+
+# Fields
+- `angle_tolerance::T`: The tolerance value for checking the closeness of angles.
+- `use_initial_guess::Bool`: A flag indicating whether to use an initial guess for the fitting algorithm.
+
+# Constructors
+- `FittingAlgo(angle_tolerance::T = convert(T, 0.1), use_initial_guess::Bool = false)`: 
+  Creates a new `FittingAlgo` instance with the specified parameters. The default value for `angle_tolerance` is 0.1, and the default value for `use_initial_guess` is `false`.
+
+# Example
+```julia
+algo = FittingAlgo(0.05, true)
+"""
+struct FittingAlgo{T}
+    angle_tolerance::T
+    use_initial_guess::Bool
+    function FittingAlgo(angle_tolerance::T = convert(T, 0.1), use_initial_guess::Bool = false) where T
+        new{T}(angle_tolerance, use_initial_guess)
+    end
+end
+
 struct Fitting{T, U}
     model::Function
     parameters::Array{T}
@@ -48,7 +73,7 @@ function vline_model(xy, p)
     return x .- c
 end
 
-function fit_shock_cluster(cluster)
+function fit_shock_cluster(cluster, FittingAlgo)
 
     # Helper function to convert a cluster to a matrix of data points in a form that LsqFit can use
     function cluster_to_data_points(shock_cluster)
@@ -64,8 +89,11 @@ function fit_shock_cluster(cluster)
 
     xy = cluster_to_data_points(cluster)
     models = [vline_model, hline_model, line_model, circle_model, parabola_model] # Use only these three firsts
-    #TODO: make user choose between interpolation guess or random guess
-    p0s = [rand(1), rand(1), rand(2), rand(3), rand(3)]  # Initial parameters for each model
+    if FittingAlgo.use_initial_guess
+        p0s = [0, 0, 0, 0, 0]  # TODO: call interpolation
+    else
+        p0s = [rand(1), rand(1), rand(2), rand(3), rand(3)]  # Initial parameters for each model
+    end
     
     best_fit = nothing
     least_error = Inf
@@ -93,8 +121,7 @@ function fit_shock_cluster(cluster)
                 range = (minimum(angles), maximum(angles))
 
                 # Define a tolerance for angle closeness
-                #TODO: Make this a parameter? Or fine tune this?
-                tolerance = 0.1  # Adjust as needed for your application
+                tolerance = FittingAlgo.angle_tolerance
                 
                 # Check if the angles span a full circle within the tolerance
                 if abs(range[1]- (-pi)) < tolerance && abs(range[2] - pi) < tolerance
@@ -110,11 +137,11 @@ function fit_shock_cluster(cluster)
     return best_fit
 end
 
-function fit_shock_clusters(shock_clusters)
+function fit_shock_clusters(shock_clusters, FittingAlgo)
     shock_fits = []
     if !isempty(shock_clusters)
         @threads for shock_cluster in shock_clusters # Sequence of fit doesn't matter
-            best_fit = fit_shock_cluster(shock_cluster)
+            best_fit = fit_shock_cluster(shock_cluster, FittingAlgo)
             push!(shock_fits, best_fit)
         end
     end
@@ -133,13 +160,13 @@ The fitted shock clusters are stored in the array `shock_fits_over_time`.
 # Returns
 - `shock_fits_over_time`: An array of fitted shock clusters over time.
 """
-function fit_shock_clusters_over_time(shock_clusters_over_time)
+function fit_shock_clusters_over_time(shock_clusters_over_time, FittingAlgo)
     nsteps = length(shock_clusters_over_time)
     shock_fits_over_time = Vector{Any}(undef, nsteps)
     @threads for t in 1:nsteps
         shock_fits = []
         if !isempty(shock_clusters_over_time[t])
-            shock_fits = fit_shock_clusters(shock_clusters_over_time[t])
+            shock_fits = fit_shock_clusters(shock_clusters_over_time[t], FittingAlgo)
         end
         shock_fits_over_time[t] = shock_fits
     end

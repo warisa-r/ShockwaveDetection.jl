@@ -26,7 +26,7 @@ struct ShockDetectionResult1D <: AbstractShockDetectionResult
 end
 
 """
-    detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo)
+    detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo, fitting_algo::FittingAlgo)
 
 Detects shocks in 2D flow data, clusters the shockpoints and applies fitting to the cluster. It also shows the runtime and memory allocations required in each subprocess
 
@@ -34,6 +34,7 @@ Detects shocks in 2D flow data, clusters the shockpoints and applies fitting to 
 - `flow_data::FlowData`: A `FlowData` object containing the 2D flow field data.
 - `shock_point_algo::Abstract2DShockDetectionAlgo`: An algorithm for detecting shock points in 2D flow data.
 - `cluster_algo::DBSCANAlgo`: A clustering algorithm (e.g., DBSCAN) to group detected shock points into clusters.
+- `fitting_algo::FittingAlgo`: An algorithm for fitting shock clusters to create a smooth representation of the shock over time.
 
 # Returns
 - `ShockDetectionResult2D`: An object containing:
@@ -44,7 +45,7 @@ Detects shocks in 2D flow data, clusters the shockpoints and applies fitting to 
 # Description
 This function detects shock points in 2D flow data using a specified shock detection algorithm. Detected shock points are clustered using the provided `DBSCANAlgo`, and then the clusters are fitted to create a smooth representation of the shock over time.
 """
-function detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo)
+function detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo, fitting_algo::FittingAlgo)
     to = TimerOutput()
     
     @timeit to "Detect Shock Points(2D)" begin
@@ -56,7 +57,7 @@ function detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionA
     end
     
     @timeit to "Fit Shock Clusters" begin
-        shock_fits_over_time = fit_shock_clusters_over_time(shock_clusters_over_time)
+        shock_fits_over_time = fit_shock_clusters_over_time(shock_clusters_over_time, fitting_algo)
     end
     
     show(to, sortby = :firstexec)
