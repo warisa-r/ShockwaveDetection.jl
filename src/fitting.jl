@@ -1,11 +1,11 @@
 using LsqFit
 using LinearAlgebra
 
-struct Fitting{T}
+struct Fitting{T, U}
     model::Function
     parameters::Array{T}
     error::T
-    range::Tuple{T, T}
+    range::Tuple{U, T} # To store range of circle model
 end
 
 # The angle of the end point and the starting point is needed to determine the proper shape

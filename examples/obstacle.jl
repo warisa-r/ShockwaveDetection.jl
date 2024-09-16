@@ -20,4 +20,4 @@ dbscan_algo = DBSCANAlgo(0.25, 50, 40)
 detection = detect(flow_data, point_detect_algo, dbscan_algo)
 
 #plot_shock_fits_over_time(flow_data, detection, false)
-create_heatmap_evo_with_shock(flow_data, detection, :density_field, true, true)
+#create_heatmap_evo_with_shock(flow_data, detection, :density_field, true, true)
