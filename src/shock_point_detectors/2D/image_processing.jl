@@ -3,7 +3,7 @@ using Statistics: mean
 
 # Function to replace NaNs with the mean of neighboring values for cells near obstacles and obstacles cells
 function replace_nan_with_mean!(matrix)
-    for i in 1:size(matrix, 1)
+    @threads for i in 1:size(matrix, 1)
         for j in 1:size(matrix, 2)
             if isnan(matrix[i, j])
                 # Get the neighborhood (3x3 window) around the NaN value since the kernel size is 3x3
