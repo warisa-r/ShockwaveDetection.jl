@@ -19,8 +19,6 @@ function replace_nan_with_mean!(matrix)
                 # Replace NaN with the mean of valid neighbors
                 if !isempty(valid_neighbors)
                     matrix[i, j] = mean(valid_neighbors)
-                else # If all neighbors are NaN (in the obstacle zone)
-                    matrix[i, j] = 0.0
                 end
             end
         end
