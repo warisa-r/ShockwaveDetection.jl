@@ -26,12 +26,12 @@ function replace_nan_with_mean!(matrix)
 end
 
 """
-    struct ImageProcessingShockDetectionAlgo <: Abstract2DShockDetectionAlgo
+    struct ImageProcessingShockDetectionAlgo{T} <: Abstract2DShockDetectionAlgo
 
 A structure that represents the image processing shock detection algorithm.
 
 # Fields
-- `threshold::Float64`: The threshold value for detecting shocks.
+- `threshold::T`: The threshold value for detecting shocks.
 - `kernelname::Symbol`: The name of the kernel to be used for image processing (e.g., `:sobel`, `:prewitt`).
 
 # Description
@@ -40,8 +40,8 @@ This struct is used to configure the image processing shock detection algorithm.
 # Example
 algo = ImageProcessingShockDetectionAlgo(threshold=0.5, kernelname=:sobel)
 """
-struct ImageProcessingShockDetectionAlgo <: Abstract2DShockDetectionAlgo
-    threshold::Float64
+struct ImageProcessingShockDetectionAlgo{T} <: Abstract2DShockDetectionAlgo
+    threshold::T
     kernelname::Symbol
 end # ImageProcessingShockDetectionAlgo
 
@@ -98,7 +98,7 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, a
     return high_gradient_intersection
 end
 
-function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo, has_obstacle)
+function detect_shock_points(flow_data::FlowData, alg::ImageProcessingShockDetectionAlgo)
     # Unpack all the values from the detector
     nsteps = flow_data.nsteps
     density_field = flow_data.density_field

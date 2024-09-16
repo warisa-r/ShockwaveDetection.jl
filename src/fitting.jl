@@ -1,14 +1,12 @@
 using LsqFit
 using LinearAlgebra
 
-struct Fitting
+struct Fitting{T}
     model::Function
-    parameters::Array{Float64}
-    error::Float64
-    range::Tuple{Float64, Float64}
+    parameters::Array{T}
+    error::T
+    range::Tuple{T, T}
 end
-
-#TODO: hline_model
 
 # The angle of the end point and the starting point is needed to determine the proper shape
 # For other models, only range of x suffices

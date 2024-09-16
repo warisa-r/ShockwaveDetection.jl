@@ -47,10 +47,8 @@ This function detects shock points in 2D flow data using a specified shock detec
 function detect(flow_data::FlowData, shock_point_algo::Abstract2DShockDetectionAlgo, cluster_algo::DBSCANAlgo)
     to = TimerOutput()
     
-    has_obstacle = isnothing(flow_data.u)  # Check if the flow data has an obstacle
-    
     @timeit to "Detect Shock Points(2D)" begin
-        shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo, has_obstacle)
+        shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo)
     end
     
     @timeit to "Cluster Shock Points" begin
