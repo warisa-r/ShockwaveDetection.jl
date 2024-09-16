@@ -1,29 +1,4 @@
 using Images
-using Statistics: mean
-
-# Function to replace NaNs with the mean of neighboring values for cells near obstacles and obstacles cells
-function replace_nan_with_mean!(matrix)
-    @threads for i in 1:size(matrix, 1)
-        for j in 1:size(matrix, 2)
-            if isnan(matrix[i, j])
-                # Get the neighborhood (3x3 window) around the NaN value since the kernel size is 3x3
-                imin = max(1, i-1)
-                imax = min(size(matrix, 1), i+1)
-                jmin = max(1, j-1)
-                jmax = min(size(matrix, 2), j+1)
-                
-                # Extract the valid (non-NaN) neighbors
-                neighbors = matrix[imin:imax, jmin:jmax]
-                valid_neighbors = neighbors[.!isnan.(neighbors)]
-                
-                # Replace NaN with the mean of valid neighbors
-                if !isempty(valid_neighbors)
-                    matrix[i, j] = mean(valid_neighbors)
-                end
-            end
-        end
-    end
-end
 
 """
     struct ImageProcessingShockDetectionAlgo{T} <: Abstract2DShockDetectionAlgo
