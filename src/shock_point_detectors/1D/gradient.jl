@@ -39,9 +39,9 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, x
     return shock_locations
 end
 
-struct GradientShockDetectionAlgo <: Abstract1DShockDetectionAlgo
-    threshold::Float64
-end # GradientEntropyShockDetectionAlgo
+struct GradientShockDetectionAlgo{T} <: Abstract1DShockDetectionAlgo
+    threshold::T
+end # GradientShockDetectionAlgo
 
 function detect(flow_data::FlowData, alg::GradientShockDetectionAlgo)
     # Unpack all the values from the detector
