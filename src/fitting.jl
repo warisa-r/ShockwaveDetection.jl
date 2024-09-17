@@ -1,5 +1,7 @@
 using LsqFit
 using LinearAlgebra
+using Interpolations
+using Statistics: mean
 
 """
     struct FittingAlgo{T}
@@ -60,7 +62,6 @@ function line_model(xy, p)
     return m*x .+ b .- y
 end
 
-
 function hline_model(xy, p)
     b = p
     y = xy[:, 2]
@@ -71,6 +72,41 @@ function vline_model(xy, p)
     c = p
     x = xy[:, 1]
     return x .- c
+end
+
+function initial_guess(model, xy)
+    if model == parabola_model
+        y = xy[:, 2]
+
+        # Ensure y_range matches the y values with the assumption that every cell has the same size. 
+        # This is needed for interpolation.
+        y_range = range(minimum(y), stop=maximum(y), length=length(y))
+
+        c_guess = mean(y)
+
+        itp = interpolate((y_range,), y, Gridded(Linear()))
+        # Evaluate the gradient at the points in xy
+        first_derivative = only.(gradient.(Ref(itp), y_range))
+
+        b_guess = mean(first_derivative)
+
+        # Create an interpolation object for the first derivative
+        itp_first_derivative = interpolate((y_range,), first_derivative, Gridded(Linear()))
+
+        # Evaluate the second derivative at the points in x
+        second_derivative = only.(gradient.(Ref(itp_first_derivative), y_range))
+
+        # Compute the mean of the second derivative
+        mean_second_derivative = mean(second_derivative)
+        a_guess = mean_second_derivative/2 # second derivative of parabola is 2a
+
+        p0 = [a_guess, b_guess, c_guess]
+        return p0
+    else
+        println("Model not supported for improved initial guess")
+    end
+
+    # return p0s    
 end
 
 function fit_shock_cluster(cluster, FittingAlgo)
@@ -90,7 +126,9 @@ function fit_shock_cluster(cluster, FittingAlgo)
     xy = cluster_to_data_points(cluster)
     models = [vline_model, hline_model, line_model, circle_model, parabola_model] # Use only these three firsts
     if FittingAlgo.use_initial_guess
-        p0s = [0, 0, 0, 0, 0]  # TODO: call interpolation
+        p0s = [[0], [0], [0, 0], [0, 0, 1.0], initial_guess(parabola_model, xy)]
+        #TODO: when all the improved initial guesses are implement, use the code below instead
+        #p0s = [initial_guess(model, xy, y_range) for model in models]  # Initial parameters for each model
     else
         p0s = [rand(1), rand(1), rand(2), rand(3), rand(3)]  # Initial parameters for each model
     end
@@ -149,13 +187,14 @@ function fit_shock_clusters(shock_clusters, FittingAlgo)
 end
 
 """
-    fit_shock_clusters_over_time(shock_clusters_over_time)
+    fit_shock_clusters_over_time(shock_clusters_over_time, FittingAlgo)
 
 A part of the 2D pipeline of `detect`. In each time frame which is stored in the array `shock_clusters_over_time`, this function fits the shock clusters to existing models of parametized curves using the `fit_shock_clusters` function. 
 The fitted shock clusters are stored in the array `shock_fits_over_time`.
 
 # Arguments
 - `shock_clusters_over_time`: An array of shock clusters over time.
+- `FittingAlgo`: An algorithm for fitting shock clusters to create a smooth representation of the shock over time.
 
 # Returns
 - `shock_fits_over_time`: An array of fitted shock clusters over time.
