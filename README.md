@@ -10,7 +10,7 @@ Currently, it can
 - Detect 1D shock by detecting large gradients across properties with a customizable parameter `threshold`
 - Visualize the change of properties along with shock positions
 
-This package also an incomplete documentation (far from complete or acceptable)
+This package also has an incomplete documentation (far from complete or acceptable)
 
 ## Goals: Technical
 1. [x] Develop 'better' methods to detect the shock
@@ -26,15 +26,17 @@ This package also an incomplete documentation (far from complete or acceptable)
 10. [x] Normal vector as partial derivatives of other fits: Warisa
    1. [x] Implement normal vector of each fits as a function?
    2. [x] Clean up the angle_estimated stuff
-11. [ ] Pipeline 1D case: Ina
-12. [ ] Develop a test series that aligns with the goal (probably from /examples) (TBD)
-   1. [ ] 1D: Check the consistency of the detection, does the shock positions disappear? What is the consistency rate? What is the velocity of the moving shock and is the detection of stationary shock consistent?
-   2. [ ] Check if line with slope works or not
-13. [ ] Better parameter initialization for the fits: Elena Either user customize this or some geometry magic to find the most optimal starting point.
+11. [x] Pipeline 1D case: Ina
+12. [ ] Better parameter initialization for the fits: Elena Either user customize this or some geometry magic to find the most optimal starting point.
+   1. [x] parabola model (using interpolation)): Warisa
+   2. [ ] line model
+   3. [ ] hline model
+   4. [ ] vline model
+   5. [ ] circle model
+13. [ ] Test 2D case accuracy with noise: Ina
 14. [x] Thread everything that we can
-15. [ ] Turn the maximum finding loop into an array where parallelizable sorting algorithm can be applied
-16. [ ] hline models
 
 ## Goals: Organizational
-1. [ ] develop a formatting script
-2. [ ] Update the documentation
+1. [ ] Update the documentation
+   1. [ ] 1D: Ina
+2. [ ] Review unnecessary functions in `visualize.jl`
