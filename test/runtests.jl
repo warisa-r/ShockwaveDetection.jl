@@ -1,6 +1,14 @@
 using Test
 using ShockwaveDetection
 
+function clean_up_temp_files()
+    try
+        rm("density_velocity_pressure_over_time_with_shock_positions.gif")
+    catch e
+        @warn "Failed to clean up temporary files" exception=e
+    end
+end
+
 DATA_DIR = pkgdir(ShockwaveDetection, "examples", "data")
 
 @testset "Compiles" begin
@@ -11,7 +19,7 @@ end
     flow_data = FlowData(joinpath(DATA_DIR, "sod_shock_left_1d.tape"), false)
     shock_positions_over_time = detect(flow_data, GradientShockDetectionAlgo(0.5))
     anim  = create_wave_animation_with_shock(flow_data, shock_positions_over_time)
-    rm("density_velocity_pressure_over_time_with_shock_positions.gif")
+    clean_up_temp_files()
 end
 
 @testset "1D supersonic shock detection" begin
@@ -19,7 +27,7 @@ end
     point_detect_algo = GradientShockDetectionAlgo(0.2)
     detection = detect(flow_data, point_detect_algo)
     anim  = create_wave_animation_with_shock(flow_data, detection)
-    rm("density_velocity_pressure_over_time_with_shock_positions.gif")
+    clean_up_temp_files()
 end
 
 @testset "2D shock detection" begin
