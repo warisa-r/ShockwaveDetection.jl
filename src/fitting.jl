@@ -74,10 +74,11 @@ function vline_model(xy, p)
     return x .- c
 end
 
+# Helper function to calculate the initial guess for every model available.
 function initial_guess(model, xy)
+    x = xy[:, 1]
+    y = xy[:, 2]
     if model == parabola_model
-        y = xy[:, 2]
-
         # Ensure y_range matches the y values with the assumption that every cell has the same size. 
         # This is needed for interpolation.
         y_range = range(minimum(y), stop=maximum(y), length=length(y))
@@ -98,10 +99,17 @@ function initial_guess(model, xy)
 
         # Compute the mean of the second derivative
         mean_second_derivative = mean(second_derivative)
-        a_guess = mean_second_derivative/2 # second derivative of parabola is 2a
+        a_guess = mean_second_derivative/2 # The second derivative of parabola is 2a
 
-        p0 = [a_guess, b_guess, c_guess]
-        return p0
+        return [a_guess, b_guess, c_guess]
+    elseif model == hline_model
+        b_guess = mean(y)
+
+        return [b_guess]
+    elseif model == vline_model
+        c_guess = mean(x)
+        
+        return [c_guess]
     else
         println("Model not supported for improved initial guess")
     end
