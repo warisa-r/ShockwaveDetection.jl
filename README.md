@@ -27,12 +27,12 @@ This package also has an incomplete documentation (far from complete or acceptab
    1. [x] Implement normal vector of each fits as a function?
    2. [x] Clean up the angle_estimated stuff
 11. [x] Pipeline 1D case: Ina
-12. [ ] Better parameter initialization for the fits: Elena Either user customize this or some geometry magic to find the most optimal starting point.
+12. [x] Better parameter initialization for the fits: Elena Either user customize this or some geometry magic to find the most optimal starting point.
    1. [x] parabola model (using interpolation)): Warisa
-   2. [ ] line model
-   3. [ ] hline model
-   4. [ ] vline model
-   5. [ ] circle model
+   2. [x] line model
+   3. [x] hline model
+   4. [x] vline model
+   5. [x] circle model
 13. [ ] Test 2D case accuracy with noise: Ina
 14. [x] Thread everything that we can
 
