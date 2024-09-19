@@ -74,47 +74,41 @@ function vline_model(xy, p)
     return x .- c
 end
 
-# Helper function to calculate the initial guess for every model available.
-function initial_guess(model, xy)
+
+# Helper function to calculate the initial guess for every model available
+function initial_guess(xy)
     x = xy[:, 1]
     y = xy[:, 2]
-    if model == parabola_model
-        # Ensure y_range matches the y values with the assumption that every cell has the same size. 
-        # This is needed for interpolation.
-        y_range = range(minimum(y), stop=maximum(y), length=length(y))
 
-        c_guess = mean(y)
+    mean_x = mean(x)
+    mean_y = mean(y)
 
-        itp = interpolate((y_range,), y, Gridded(Linear()))
-        # Evaluate the gradient at the points in xy
-        first_derivative = only.(gradient.(Ref(itp), y_range))
+    # Ensure y_range matches the y values with the assumption that every cell has the same size. 
+    # This is needed for interpolation.
+    y_range = range(minimum(y), stop=maximum(y), length=length(y))
 
-        b_guess = mean(first_derivative)
+    itp = interpolate((y_range,), y, Gridded(Linear())) # Interpolation object is needed to calculate the gradient of each point
+    # Evaluate the gradient at the points in xy
+    first_derivative = only.(gradient.(Ref(itp), y_range))
 
-        # Create an interpolation object for the first derivative
-        itp_first_derivative = interpolate((y_range,), first_derivative, Gridded(Linear()))
+    mean_first_derivative = mean(first_derivative)
 
-        # Evaluate the second derivative at the points in x
-        second_derivative = only.(gradient.(Ref(itp_first_derivative), y_range))
+    # Create an interpolation object for the first derivative
+    itp_first_derivative = interpolate((y_range,), first_derivative, Gridded(Linear()))
 
-        # Compute the mean of the second derivative
-        mean_second_derivative = mean(second_derivative)
-        a_guess = mean_second_derivative/2 # The second derivative of parabola is 2a
+    # Evaluate the second derivative at the points in x
+    second_derivative = only.(gradient.(Ref(itp_first_derivative), y_range))
 
-        return [a_guess, b_guess, c_guess]
-    elseif model == hline_model
-        b_guess = mean(y)
+    # Compute the mean of the second derivative
+    mean_second_derivative = mean(second_derivative)
 
-        return [b_guess]
-    elseif model == vline_model
-        c_guess = mean(x)
-        
-        return [c_guess]
-    else
-        println("Model not supported for improved initial guess")
-    end
+    guess_vline = [mean_x]
+    guess_hline = [mean_y]
+    guess_line = [mean_first_derivative, mean_y]
+    guess_circle = [mean_x, mean_y, sqrt(mean((x .- mean_x).^2 .+ (y .- mean_y).^2))]
+    guess_parabola = [mean_second_derivative/2, mean_first_derivative, mean_y]
 
-    # return p0s    
+    return [guess_vline, guess_hline, guess_line, guess_circle, guess_parabola]
 end
 
 function fit_shock_cluster(cluster, FittingAlgo)
@@ -134,9 +128,7 @@ function fit_shock_cluster(cluster, FittingAlgo)
     xy = cluster_to_data_points(cluster)
     models = [vline_model, hline_model, line_model, circle_model, parabola_model] # Use only these three firsts
     if FittingAlgo.use_initial_guess
-        p0s = [[0], [0], [0, 0], [0, 0, 1.0], initial_guess(parabola_model, xy)]
-        #TODO: when all the improved initial guesses are implement, use the code below instead
-        #p0s = [initial_guess(model, xy, y_range) for model in models]  # Initial parameters for each model
+        p0s = initial_guess(xy)
     else
         p0s = [rand(1), rand(1), rand(2), rand(3), rand(3)]  # Initial parameters for each model
     end
