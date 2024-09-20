@@ -4,14 +4,16 @@ using BenchmarkTools  # Import the BenchmarkTools library
 using Interpolations
 using LinearAlgebra
 
+# Horizontal line model function (only intercept b)
 function hline_model(xy, p)
-    b = p
+    b = p[1]
     y = xy[:, 2]
     return y .- b
 end
-# Function to fit a hline with a random initial guess
+
+# Function to fit a horizontal line with a random initial guess
 function fit_hline_with_random_guess(xy)
-    p0 = rand(1)  # Random initial guesses for m, b
+    p0 = rand(1)  # Random initial guess for b
     println("Random initial guess: ", p0)
 
     fit = curve_fit(hline_model, xy, zeros(size(xy, 1)), p0)
@@ -20,15 +22,11 @@ function fit_hline_with_random_guess(xy)
     return p0, fit, fit_error
 end
 
-# Improved function to fit a hline with a better initial guess
+# Improved function to fit a horizontal line with a better initial guess
 function fit_hline_with_improved_guess(xy)
-    x_range = LinRange(-50, 50, 100)
-    y_range = LinRange(-50, 50, 100)
-    x = xy[:, 1]
     y = xy[:, 2]
 
-    b_guess = mean(y)
-
+    b_guess = mean(y)  # The best guess for horizontal line b is the mean of y
     p0 = [b_guess]
 
     fit = curve_fit(hline_model, xy, zeros(size(xy, 1)), p0)
@@ -37,36 +35,38 @@ function fit_hline_with_improved_guess(xy)
     return p0, fit, fit_error
 end
 
-# Function to generate noisy hlinear data
-function generate_noisy_hlinear_data(p, noise_level)
+# Function to generate noisy horizontal data
+function generate_noisy_hline_data(p, noise_level)
     b = p[1]
     x = range(-50, 50, length=100)
-    y = [b for _ in x]
+    y = b .+ randn(length(x)) * noise_level  # Just noise around the intercept b
 
-    y_noisy = y .+ randn(length(y)) * noise_level
-    xy = hcat(x, y_noisy)
+    xy = hcat(x, y)
     return xy
 end
 
-# Define the parameter combinations to test
+# Define the parameter combinations to test (just the intercept b)
 param_combinations = [
-    [0.005],
     [0.5],
-    [1],
-    [5],
-    [10],
-    [50],
+    [1.0],
+    [500.0],
+    [0.005],
+    [5000.0],
+    [0.0005]
 ]
 
 noise_levels = [0.0, 1.0, 5.0, 7.5, 10.0]
 
 # Define the output path
-output_path = "sandbox/param_performance_results/hline"
+output_path = "sandbox/param_performance_resultshline"
+
+# Create the directory if it doesn't exist
+isdir(output_path) || mkpath(output_path)
 
 for (i, params) in enumerate(param_combinations)
     results = []
     for noise_level in noise_levels
-        xy = generate_noisy_hlinear_data(params, noise_level)
+        xy = generate_noisy_hline_data(params, noise_level)
 
         improved_benchmark = @benchmark fit_hline_with_improved_guess($xy)
         improved_initial_guess, improved_fit, _ = fit_hline_with_improved_guess(xy)
