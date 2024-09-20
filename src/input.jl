@@ -74,5 +74,3 @@ function FlowData(file_path::String, mach_to_m_s=true)
     end
     return FlowData(ncells, nsteps, bounds, tsteps, u, density_field, velocity_field, pressure_field, mach_to_m_s, cell_ids)
 end
-
-# TODO: if the initial condition is given like the scripts, convert EulerSim to FlowData
