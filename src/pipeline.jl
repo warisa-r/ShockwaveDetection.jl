@@ -87,7 +87,7 @@ function detect(flow_data::FlowData, shock_point_algo::Abstract1DShockDetectionA
     has_obstacle = isnothing(flow_data.u)  # Check if the flow data has an obstacle
 
     @timeit to "Detect Shock Points (1D)" begin
-        shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo, has_obstacle)
+        shock_positions_over_time = detect_shock_points(flow_data, shock_point_algo)
     end
 
     show(to, sortby = :firstexec)
