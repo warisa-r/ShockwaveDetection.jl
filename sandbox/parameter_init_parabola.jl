@@ -90,7 +90,7 @@ param_combinations = [
     [0.005, 5000, 0.5]
 ]
 
-noise_levels = [0.0, 0.1, 1.0, 10.0]
+noise_levels = [0.0, 1.0, 5.0, 7.5, 10.0]
 
 for (i, params) in enumerate(param_combinations)
     results = []
@@ -99,11 +99,13 @@ for (i, params) in enumerate(param_combinations)
         
         # Benchmark improved initial guess
         improved_benchmark = @benchmark fit_parabola_with_improved_guess($xy)
-        improved_initial_guess, improved_fit, improved_error = fit_parabola_with_improved_guess(xy)
+        improved_initial_guess, improved_fit, _ = fit_parabola_with_improved_guess(xy)
+        improved_error = norm(improved_fit.param - params)
         
         # Benchmark random initial guess
         random_benchmark = @benchmark fit_parabola_with_random_guess($xy)
-        random_initial_guess, random_fit, random_error = fit_parabola_with_random_guess(xy)
+        random_initial_guess, random_fit, _ = fit_parabola_with_random_guess(xy)
+        random_error = norm(random_fit.param - params)
         
         push!(results, (noise_level, improved_benchmark, improved_error, random_benchmark, random_error))
     end
