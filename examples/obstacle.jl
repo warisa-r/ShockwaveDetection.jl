@@ -2,7 +2,7 @@ using ShockwaveDetection
 using ShockwaveProperties
 using Euler2D:Euler2D
 
-ENV["JULIA_NUM_THREADS"] = "4"
+ENV["JULIA_NUM_THREADS"] = "8       "
 
 flow_data = FlowData("examples/data/obstacle/funky_square.celltape")
 point_detect_algo = ImageProcessingShockDetectionAlgo(0.2, :prewitt)

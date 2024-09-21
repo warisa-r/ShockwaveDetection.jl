@@ -136,7 +136,6 @@ function create_heatmap_evo_1D(flow_data::FlowData, field::Symbol, tube_circumfe
     fig = CairoMakie.Figure(size = (1000, 400))
     ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
 
-    #TODO: add a colorbar
 
     # Record the animation
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
@@ -156,8 +155,15 @@ function create_heatmap_evo_2D(flow_data, field)
         velocity_field_x = velocity_field[1, :, :, :]
         velocity_field_y = velocity_field[2, :, :, :]
         field_data = sqrt.(velocity_field_x.^2 + velocity_field_y.^2)
-    else
+        unit = "m/s"
+    elseif field == :density_field
         field_data = getfield(flow_data, field)
+        unit = "kg/m^3"
+    elseif field == :pressure_field
+        field_data = getfield(flow_data, field)
+        unit = "N/m^2"
+    else
+        error("Unsupported field type for visualization")
     end
 
     tsteps = flow_data.tsteps
@@ -176,7 +182,7 @@ function create_heatmap_evo_2D(flow_data, field)
 
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 800))
-    ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
+    ax = CairoMakie.Axis(fig[1, 1], title = "$field [$unit] Field Evolution")
 
     # Add a color bar
     heatmap_colorbar = CairoMakie.Colorbar(fig[1, 2], limits=(global_min, global_max))
@@ -191,7 +197,7 @@ function create_heatmap_evo_2D(flow_data, field)
         CairoMakie.heatmap!(ax, x, y, field_t; colorrange=(global_min, global_max))
     
         # Update the title with the current time step
-        ax.title = "$field Field - Time Step: $t_step"
+        ax.title = "$field [$unit] Field - Time Step: $t_step"
     end
 end
 
@@ -272,8 +278,15 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
         velocity_field_x = velocity_field[1, :, :, :]
         velocity_field_y = velocity_field[2, :, :, :]
         field_data = sqrt.(velocity_field_x.^2 + velocity_field_y.^2)
-    else
+        unit = "m/s"
+    elseif field == :density_field
         field_data = getfield(flow_data, field)
+        unit = "kg/m^3"
+    elseif field == :pressure_field
+        field_data = getfield(flow_data, field)
+        unit = "N/m^2"
+    else
+        error("Unsupported field type for visualization")
     end
 
     
@@ -298,7 +311,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
 
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 800))
-    ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
+    ax = CairoMakie.Axis(fig[1, 1], title = "$field [$unit] Field Evolution")
 
     # Set explicit limits for the plot axes
     CairoMakie.xlims!(ax, bounds[1][1], bounds[1][2])
@@ -338,12 +351,12 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
                 shock_fits = shock_fits_over_time[t]
                 for shock_fit in shock_fits
                     if shock_fit.model == vline_model
-                        CairoMakie.vlines!(ax, shock_fit.parameters[1], color=:orange)
+                        CairoMakie.vlines!(ax, shock_fit.parameters[1], color=:white)
                         if show_normal_vector
                             average_y = bounds[2][1] + bounds[2][2]/2
                             start_x = shock_fit.parameters[1]
                             normals_x , normals_y = calculate_normal_vector(shock_fit, [], flow_data, t)
-                            CairoMakie.arrows!(ax, [start_x], [average_y], normals_x, normals_y, color=:green)
+                            CairoMakie.arrows!(ax, [start_x], [average_y], normals_x, normals_y, color=:yellow)
                         end
                     else
                         if shock_fit.model == circle_model
@@ -365,9 +378,9 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
                             end
                         end
                         if show_normal_vector
-                            CairoMakie.arrows!(ax, x_values, y_values, normals_x, normals_y, color=:green)
+                            CairoMakie.arrows!(ax, x_values, y_values, normals_x, normals_y, color=:yellow)
                         end
-                        CairoMakie.lines!(ax, x_values, y_values, color=:orange)
+                        CairoMakie.lines!(ax, x_values, y_values, color=:white)
                     end
                 end
             end
@@ -376,7 +389,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
         println("Frame rendered for time step: $t_step")
     
         # Update the title with the current time step
-        ax.title = "$field Field - Time Step: $t_step"
+        ax.title = "$field Field - Time Step [$unit]: $t_step"
     end
 end
 
