@@ -52,11 +52,9 @@ function generate_noisy_circular_data(p, noise_level)
     θ = LinRange(0, 2π, num_points)
     x = x0 .+ r .* cos.(θ) .+ noise_level .* randn(num_points)
     y = y0 .+ r .* sin.(θ) .+ noise_level .* randn(num_points)
-    # Add noise
-    y_noisy = y .+ randn(length(y)) * noise_level  # Adjust noise level as needed
 
     # Combine into xy matrix
-    xy = hcat(x, y_noisy)
+    xy = hcat(x, y)
     return xy
 end
 
