@@ -7,7 +7,7 @@ ENV["JULIA_NUM_THREADS"] = "4"
 flow_data = FlowData("examples/data/obstacle/funky_square.celltape")
 point_detect_algo = ImageProcessingShockDetectionAlgo(0.2, :prewitt)
 dbscan_algo = DBSCANAlgo(0.25, 50, 40)
-fitting_algo = FittingAlgo(0.1, true)
+fitting_algo = FittingAlgo(0.1, false)
 
 # Square case
 # What seems to be happening in the first frame is that

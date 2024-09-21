@@ -285,6 +285,10 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
     # Define the y-range
     y = range(bounds[2][1], bounds[2][2], length=ncells[2])
 
+    # Compute the global minimum and maximum, ignoring NaN values
+    global_min = minimum(skipmissing(vec(filter(!isnan, field_data))))
+    global_max = maximum(skipmissing(vec(filter(!isnan, field_data))))
+
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 800))
     ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
@@ -292,6 +296,9 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
     # Set explicit limits for the plot axes
     CairoMakie.xlims!(ax, bounds[1][1], bounds[1][2])
     CairoMakie.ylims!(ax, bounds[2][1], bounds[2][2])
+
+    # Add a color bar
+    heatmap_colorbar = CairoMakie.Colorbar(fig[1, 2], limits=(global_min, global_max))
 
     if !show_curve && show_normal_vector
         error("Cannot show normal vectors without showing the curve that they belong to!")
@@ -301,12 +308,12 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
         shock_clusters = shock_clusters_over_time[t]
         num_clusters = length(shock_clusters)
-        
+
         # Extract the field data for the current time step
         field_t = field_data[:, :, t]
 
-        # Create the heatmap and store the returned object
-        CairoMakie.heatmap!(ax, x, y, field_t)
+        # Create the heatmap with fixed color limits for consistency
+        CairoMakie.heatmap!(ax, x, y, field_t; colorrange=(global_min, global_max))
 
         # Overlay shock positions if available for the current time step
         if !isempty(shock_positions_over_time[t])
@@ -326,23 +333,19 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
                     if shock_fit.model == vline_model
                         CairoMakie.vlines!(ax, shock_fit.parameters[1], color=:orange)
                         if show_normal_vector
-                            average_y = bounds[2][1] + bounds[2][2]/ 2
+                            average_y = bounds[2][1] + bounds[2][2]/2
                             start_x = shock_fit.parameters[1]
-                            # Here evenly_spaced_range vector can be an empty set because one normal vector is enough to represent
-                            # the vertical line
                             normals_x , normals_y = calculate_normal_vector(shock_fit, [], flow_data, t)
                             CairoMakie.arrows!(ax, [start_x], [average_y], normals_x, normals_y, color=:green)
                         end
                     else
                         if shock_fit.model == circle_model
                             angles = range(shock_fit.range[1], shock_fit.range[2], length= round(Int, ncells[1] / num_clusters))
-                            # Calculate x and y coordinates based on the circle equation
                             x_values = shock_fit.parameters[1] .+ shock_fit.parameters[3] .* cos.(angles)
                             y_values = shock_fit.parameters[2] .+ shock_fit.parameters[3] .* sin.(angles)
                             if show_normal_vector
                                 normals_x, normals_y = calculate_normal_vector(shock_fit, angles, flow_data, t)
                             end
-                            
                         else
                             x_values = range(shock_fit.range[1], shock_fit.range[2], length= round(Int, ncells[1] / num_clusters))
                             if shock_fit.model == line_model
@@ -355,7 +358,7 @@ function create_heatmap_evo_with_shock_2D(flow_data, detection, field, show_curv
                             end
                         end
                         if show_normal_vector
-                            CairoMakie.arrows!(ax, x_values, y_values, normals_x, normals_y, color=:green) # Normal vector of the circle
+                            CairoMakie.arrows!(ax, x_values, y_values, normals_x, normals_y, color=:green)
                         end
                         CairoMakie.lines!(ax, x_values, y_values, color=:orange)
                     end
