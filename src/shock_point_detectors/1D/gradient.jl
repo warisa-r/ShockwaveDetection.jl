@@ -39,6 +39,20 @@ function detect_discon_at_timestep(density_at_t, velocity_at_t, pressure_at_t, x
     return shock_locations
 end
 
+"""
+    struct GradientShockDetectionAlgo{T} <: Abstract1DShockDetectionAlgo
+
+A structure that represents the gradient-based shock detection algorithm for 1D data.
+
+# Fields
+- `threshold::T`: The threshold value for detecting shocks based on the gradient magnitude.
+
+# Description
+This struct is used to configure the gradient-based shock detection algorithm in 1D simulations. The algorithm detects shocks by computing the gradient of the flow variables (e.g., density, pressure, velocity) and identifying regions where the gradient exceeds the specified threshold value.
+
+# Example
+algo = GradientShockDetectionAlgo(threshold=0.2)
+"""
 struct GradientShockDetectionAlgo{T} <: Abstract1DShockDetectionAlgo
     threshold::T
 end # GradientShockDetectionAlgo
