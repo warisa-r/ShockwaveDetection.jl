@@ -170,9 +170,16 @@ function create_heatmap_evo_2D(flow_data, field)
     # Define the y-range
     y = range(bounds[2][1], bounds[2][2], length=ncells[2])
 
+    # Compute the global minimum and maximum, ignoring NaN values
+    global_min = minimum(skipmissing(vec(filter(!isnan, field_data))))
+    global_max = maximum(skipmissing(vec(filter(!isnan, field_data))))
+
     # Create the figure for the animation
     fig = CairoMakie.Figure(size = (1000, 800))
     ax = CairoMakie.Axis(fig[1, 1], title = "$field Field Evolution")
+
+    # Add a color bar
+    heatmap_colorbar = CairoMakie.Colorbar(fig[1, 2], limits=(global_min, global_max))
 
     # Record the animation
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
@@ -181,7 +188,7 @@ function create_heatmap_evo_2D(flow_data, field)
         field_t = field_data[:, :, t]
 
         # Create the heatmap and store the returned object
-        CairoMakie.heatmap!(ax, x, y, field_t)
+        CairoMakie.heatmap!(ax, x, y, field_t; colorrange=(global_min, global_max))
     
         # Update the title with the current time step
         ax.title = "$field Field - Time Step: $t_step"
