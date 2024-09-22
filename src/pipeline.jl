@@ -21,6 +21,18 @@ struct ShockDetectionResult2D <: AbstractShockDetectionResult
     shock_fits_over_time::Vector{Any}
 end
 
+"""
+    struct ShockDetectionResult1D <: AbstractShockDetectionResult
+
+A structure to hold the results of 1D shock detection.
+
+# Fields
+- `shock_positions_over_time::Vector{Any}`: A vector of the CartesianIndices of shock points detected in every time frame.
+
+# Description
+This structure is used to store the results of shock detection in 1D flow data. It contains the detected shock points over time.
+"""
+
 struct ShockDetectionResult1D <: AbstractShockDetectionResult
     shock_positions_over_time::Vector{Any}
 end
