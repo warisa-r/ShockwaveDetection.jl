@@ -241,7 +241,6 @@ function calculate_normal_vector(fit::Fitting, evenly_spaced_range, flow_data, t
     bounds = flow_data.bounds
 
     if fit.model == line_model
-        #TODO: Check if this work! This is just pure implementation no test!
         m, b = fit.parameters
 
         # Calculate the magnitude of each vector
