@@ -1,7 +1,7 @@
 # ShockwaveDetection
 
 [![Build Status](https://github.com/warisa-r/ShockwaveDetection.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/warisa-r/ShockwaveDetection.jl/actions/workflows/CI.yml?query=branch%3Amain)
-
+Report: https://www.overleaf.com/project/66f0fd6a45aa05bd466267c2
 
 ## Brief description
 
