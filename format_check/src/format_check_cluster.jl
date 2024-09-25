@@ -1,7 +1,13 @@
 using JuliaFormatter
 
-# Provide the path to your clustering.jl file
-file_to_check = "C:\\Users\\eivan\\Dropbox\\My PC (DESKTOP-AB2UFDR)\\Downloads\\ShockwaveDetection.jl-main (6)\\ShockwaveDetection.jl-main\\src\\cluster.jl"
+# Provide the relative path to your clustering.jl file
+relative_path_to_check = joinpath("src", "cluster.jl")
+
+# Get the current working directory
+current_dir = pwd()
+
+# Combine current directory and relative path
+file_to_check = joinpath(current_dir, relative_path_to_check)
 
 @info "Checking format of $file_to_check"
 try
@@ -26,7 +32,7 @@ try
         println(original_code)
         println("\n--- Formatted Code ---\n")
         println(formatted_code)
-        
+
         # Optionally, you can overwrite the original file with formatted code
         # write(resolved_path, formatted_code)
     end
