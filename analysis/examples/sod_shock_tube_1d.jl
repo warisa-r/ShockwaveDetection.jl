@@ -16,7 +16,7 @@ flow_data = FlowData("examples/data/sod_shock_left_1d.tape", false)
 # Apply noise to flow data
 noisy_flow_data = NoiseAnalysis.apply_noise_to_flow(flow_data, noise_data)
 
-point_detect_algo = GradientShockDetectionAlgo(0.5)
+point_detect_algo = GradientShockDetectionAlgo(0.8)
 
 original_shock_positions_over_time = detect(flow_data, point_detect_algo)
 noisy_shock_positions_over_time = detect(noisy_flow_data, point_detect_algo)
