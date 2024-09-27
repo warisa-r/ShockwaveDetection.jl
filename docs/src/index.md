@@ -2,15 +2,15 @@
 
 ShockDetection.jl is a Julia package for detecting shocks in time series data from Godunov solver.
 The packages can detect shock discontinuities for grid data with dimensions
-- Nx x Nt when Nx are the number of grid points in x axis and Nt is the number of time steps in the simulation
-- Nx x Ny x Nt when Nx and Ny are the number of grid points in x and y axes respectively, and Nt is the number of time steps in the simulation
+- Nu x Nx x Nt when Nx are the number of grid points in x axis and Nt is the number of time steps in the simulation
+- Nu x Nx x Ny x Nt when Nx and Ny are the number of grid points in x and y axes respectively, and Nt is the number of time steps in the simulation
 
 The package can only process simulation files that end with .tape and .celltape. Other simulation file types are not supported!
 
 ## Features
 - **Shock detection (1D and 2D)**: 
-  - For 1D data (Nx x Nt): Detects shocks based on gradients using the finite difference method. 
-  - For 2D data (Nx x Ny x Nt): Detects shocks based on gradients, clusters points using DBSCAN and fits optimal shock curves via the Levenberg–Marquardt algorithm.
+  - For 1D data (Nu x Nx x Nt): Detects shocks based on gradients using the finite difference method. 
+  - For 2D data (Nu x Nx x Ny x Nt): Detects shocks based on gradients, clusters points using DBSCAN and fits optimal shock curves via the Levenberg–Marquardt algorithm.
 - **Visualization**: Generate shock visualizations, calculate normal vectors for 2D simulations with `create_heatmap_evo_with_shock`, or use `calculate_normal_vector` to compute vectors at specific time frames.
 - **Compatibility**: Works with Julia 1.9 and 1.10.
 
