@@ -37,6 +37,6 @@ This package also has an incomplete documentation (far from complete or acceptab
 14. [x] Thread everything that we can
 
 ## Goals: Organizational
-1. [ ] Update the documentation
-   1. [ ] 1D: Ina
+1. [x] Update the documentation
+   1. [x] 1D: Ina
 2. [ ] Review unnecessary functions in `visualize.jl`

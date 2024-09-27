@@ -32,7 +32,6 @@ A structure to hold the results of 1D shock detection.
 # Description
 This structure is used to store the results of shock detection in 1D flow data. It contains the detected shock points over time.
 """
-
 struct ShockDetectionResult1D <: AbstractShockDetectionResult
     shock_positions_over_time::Vector{Any}
 end

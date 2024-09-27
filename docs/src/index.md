@@ -78,6 +78,7 @@ DBSCANAlgo
 
 ## Fitting-related functions and structs
 ```@docs
+FittingAlgo
 fit_shock_clusters_over_time
 calculate_normal_vector
 ```
