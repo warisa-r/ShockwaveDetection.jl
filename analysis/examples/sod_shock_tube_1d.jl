@@ -24,4 +24,4 @@ noisy_shock_positions_over_time = detect(noisy_flow_data, point_detect_algo)
 #println("noisy_shock_positions_over_time: ", noisy_shock_positions_over_time)
 
 # Detect and compare shock positions with and without noise
-shock_diff = NoiseAnalysis.compare_shock_positions_over_time_1d(original_shock_positions_over_time, noisy_shock_positions_over_time)
+shock_diff = NoiseAnalysis.compare_shock_positions_over_time_1d(original_shock_positions_over_time, noisy_shock_positions_over_time, 10.0, 100.0)
