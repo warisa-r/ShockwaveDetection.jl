@@ -131,37 +131,45 @@ function find_closest_match(value, noisy_positions)
     return noisy_positions[min_idx], min_idx
 end
 
-function compare_shock_positions_over_time_1d(original_positions, noisy_positions, threshold=10.0, large_penalty=100.0)
-    diffs = Float64[]
-    missing_count = 0
+# Helper function to find the closest match for a shock in the noisy data
+function find_closest_match(value, noisy_positions)
+    if isempty(noisy_positions)
+        return nothing, nothing
+    end
+
+    # Find the closest position in noisy_positions
+    differences = abs.(noisy_positions .- value)
+    min_diff, min_idx = findmin(differences)
+
+    # Return the closest noisy position and its index
+    return noisy_positions[min_idx], min_idx
+end
+
+# Main function to compare 1D shock positions over time
+function compare_shock_positions_over_time_1d(original_positions, noisy_positions; threshold=10.0)
+    diffs = Float64[]  # To store the differences between shocks
+    missing_count = 0  # Track the number of missing shocks
 
     for (orig, noisy) in zip(original_positions, noisy_positions)
         if isempty(orig) && isempty(noisy)
-            # Both are empty, no shocks detected in both original and noisy
+            # No shocks in both original and noisy, no comparison needed
             continue
         elseif isempty(noisy) && !isempty(orig)
-            # Noisy missed all shocks, apply large penalty for each missing shock
-            missing_count += length(orig)
-            for _ in orig
-                push!(diffs, large_penalty)
-            end
+            # No shocks detected in noisy but there are shocks in original
+            missing_count += length(orig)  # Count all as missing
             continue
-        elseif isempty(orig)
-            # No original shock, but noisy detected something (false positives)
-            # This may not count as a "missing", but it could be penalized differently
-            missing_count += length(noisy)
-            for _ in noisy
-                push!(diffs, large_penalty)
-            end
+        elseif isempty(orig) && !isempty(noisy)
+            # Original has no shocks, but noisy has extra shocks (false positives)
+            missing_count += length(noisy)  # Count all noisy as false detections
             continue
         end
 
         # Match shocks between original and noisy
         for orig_pos in orig
             closest_noisy_pos, closest_idx = find_closest_match(orig_pos, noisy)
+
             if isnothing(closest_noisy_pos) || abs(orig_pos - closest_noisy_pos) > threshold
-                # No match found within threshold, apply penalty
-                push!(diffs, large_penalty)
+                # No match found within the threshold, consider it missing
                 missing_count += 1
             else
                 # Calculate squared difference for valid matches
@@ -171,92 +179,78 @@ function compare_shock_positions_over_time_1d(original_positions, noisy_position
                 deleteat!(noisy, closest_idx)
             end
         end
+
+        # Any remaining noisy positions are unmatched, count as false positives
+        if !isempty(noisy)
+            missing_count += length(noisy)
+        end
     end
 
+    # If there are no valid differences to compute RMSE, return NaN and the count of missing positions
     if isempty(diffs)
         return NaN, missing_count
     end
 
+    # Calculate RMSE only on the valid matched differences
     rmse = sqrt(mean(diffs))
     return rmse, missing_count
 end
 
-
 """
-    compare_shock_fits_over_time(original_fit, noisy_fit)
-
-Compare the parameters of original and noisy shock fits over time by calculating the root mean square error (RMSE) between them.
-
-### Parameters:
-- `original_fit::Vector{Vector{Union{Nothing, Fitting}}}`: A nested vector of fitting instances representing the original shock fits. Each inner vector corresponds to shock fits at a specific time step.
-- `noisy_fit::Vector{Vector{Union{Nothing, Fitting}}}`: A nested vector of fitting instances representing the noisy shock fits. Each inner vector corresponds to shock fits at the same specific time step.
-
-### Returns:
-- `Float64`: The root mean square error (RMSE) between the extracted parameters of the original and noisy fits.
-
-### Details:
-- The function extracts the first parameter from each fitting instance (if valid) and compares the parameters from both original and noisy fits.
-- If there are any missing parameters (instances of `nothing`), they are counted and reported.
-- If the lengths of the parameter vectors differ, the shorter vector is padded with zeroes to match the length of the longer vector.
-- The function computes the RMSE based on the differences between the parameter vectors.
 """
-function compare_shock_fits_over_time(original_fit, noisy_fit)
-    # Initialize parameter storage and missing count
-    original_params = Float64[]
-    noisy_params = Float64[]
-    missing_count = 0  # Count how many parameters are missing
+# Helper function to calculate residuals between fit and original data points from the shock point detection
+function calculate_residuals(fit::ShockwaveDetection.Fitting, data_points)
+    residuals = Float64[]
 
-    # Helper function to extract parameters from nested arrays
-    function extract_params(fits, params)
-        for fit_vector in fits
-            for fit in fit_vector
-                if fit !== nothing
-                    # Append all elements of fit.parameters to params
-                    append!(params, fit.parameters)  
-                end
-            end
+    for i in eachindex(data_points) 
+        fitted_value = fit.model(data_points[i][1], fit.parameters)  # Call the model function with parameters
+        actual_value = data_points[i][2]                             # Actual y-value from the data
+        println("Fitted value: ", fitted_value, " Actual value: ", actual_value)
+        push!(residuals, abs(fitted_value - actual_value))
+    end
+
+    return residuals
+end
+
+# Main function to compare fits over time by analyzing residuals rather than raw parameters
+function compare_shock_fits_over_time(original_fit, noisy_fit, original_shock_positions_over_time, noisy_shock_positions_over_time, flow_data; threshold=10.0)
+    bounds = flow_data.bounds
+    ncells = flow_data.ncells
+    nsteps = flow_data.nsteps
+    rmse_results = Vector{Float64}(undef, nsteps)  
+    data_points = Vector{Any}(undef, nsteps)       
+
+    # Define the x-range
+    x = range(bounds[1][1], bounds[1][2], length=ncells[1])
+
+    # Define the y-range
+    y = range(bounds[2][1], bounds[2][2], length=ncells[2])
+
+    for t in eachindex(nsteps)  # Use eachindex for time steps
+        if isempty(original_shock_positions_over_time[t]) 
+            rmse_results[t] = NaN  # No shock positions, set RMSE as NaN
+            data_points[t] = []     # No data points to analyze
+            continue
         end
+
+        # Transform shock positions to Cartesian coordinates
+        original_data_points[t] = ShockwaveDetection.cartesian_index_to_xy(original_shock_positions_over_time[t], x, y)
+        noisy_data_points[t] = ShockwaveDetection.cartesian_index_to_xy(noisy_shock_positions_over_time[t], x, y)
+
+        # Calculate residuals for original and noisy fits
+        original_residuals = calculate_residuals(original_fit[t], original_data_points[t])  
+        noisy_residuals = calculate_residuals(noisy_fit[t], noisy_data_points[t])       
+
+        if isempty(original_residuals) || isempty(noisy_residuals)
+            error("No valid residuals found for the input fits.")
+        end
+
+        # Compare the residuals to see how well the fits match the actual data points
+        residual_diffs = abs.(original_residuals .- noisy_residuals)
+
+        # Calculate the root mean square error between residuals
+        rmse_results[t] = sqrt(mean(residual_diffs.^2))
     end
 
-    # Extract parameters for original and noisy fits
-    extract_params(original_fit, original_params)
-    extract_params(noisy_fit, noisy_params)
-
-    # Check the extracted parameters
-    println("Extracted Original Parameters: ", original_params)
-    println("Extracted Noisy Parameters: ", noisy_params)
-
-    # Find the maximum length of parameter lists (for padding)
-    max_len = max(length(original_params), length(noisy_params))
-
-    # Pad the shorter array with NaNs (or another value like Inf) to indicate missing parameters
-    if length(original_params) < max_len
-        missing_count += max_len - length(original_params)  # Increment missing count
-        padding = fill(NaN, max_len - length(original_params))
-        append!(original_params, padding)
-    end
-
-    if length(noisy_params) < max_len
-        missing_count += max_len - length(noisy_params)  # Increment missing count
-        padding = fill(NaN, max_len - length(noisy_params))
-        append!(noisy_params, padding)
-    end
-
-    # Check the new lengths after padding
-    println("Padded Original Parameters: ", original_params)
-    println("Padded Noisy Parameters: ", noisy_params)
-
-    # Calculate the differences while ignoring NaNs
-    differences = original_params .- noisy_params
-    filtered_differences = filter(!isnan, differences)  # Remove NaNs for RMSE calculation
-
-    if isempty(filtered_differences)
-        println("No valid parameter differences to calculate RMSE.")
-        return NaN, missing_count  # If all values were missing
-    end
-
-    # Calculate the RMSE (ignoring NaN values)
-    rmse = sqrt(mean(filtered_differences .^ 2))
-
-    return rmse, missing_count
+    return rmse_results
 end
