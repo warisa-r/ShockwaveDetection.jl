@@ -4,6 +4,9 @@ using ShockwaveProperties
 using Unitful
 using ShockwaveDetection
 
+# Create a NoiseData instance
+#noise_data = NoiseData(0.01, Normal(0, 1))  # 1% noise intensity, Gaussian distribution
+
 flow_data = FlowData("examples/data/sod_shock_left_1d.tape", false)
 
 point_detect_algo = GradientShockDetectionAlgo(0.5)

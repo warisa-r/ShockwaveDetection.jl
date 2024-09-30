@@ -13,32 +13,32 @@ using .NoiseAnalysis
 A structure to store noise configuration for testing and analysis purposes.
 
 # Fields
-- `intensity::Float64`: The intensity of the noise.
-- `distribution::T`: The probability distribution used to generate noise.
+- `intensity::T`: The intensity of the noise.
+- `distribution::D`: The probability distribution used to generate noise.
 """
-struct NoiseData{T}
-    intensity::Float64
-    distribution::T
+struct NoiseData{T, D}
+    intensity::T
+    distribution::D
 end
 
 """
-    NoiseData(intensity::Float64, distribution::T) -> NoiseData{T}
+    NoiseData(intensity::T, distribution::D) -> NoiseData{T}
 
 Constructs a `NoiseData` instance with the specified intensity and distribution.
 
 # Arguments
-- `intensity`: A `Float64` representing the intensity of the noise.
+- `intensity`: Representing the intensity of the noise.
 - `distribution`: The probability distribution used to generate noise.
 
 # Returns
 - A `NoiseData` instance.
 """
-function NoiseData(intensity::Float64, distribution::T) where T
-    return NoiseData{T}(intensity, distribution)
+function NoiseData(intensity::T, distribution::D) where {T, D}
+    return NoiseData{T, D}(intensity, distribution)
 end
 
 """
-    apply_noise(data::Array{T}, noise_data::NoiseData) -> Array{T}
+    apply_noise(data::Array{T}, noise_data::NoiseData) -> Array{T, D}
 
 Applies noise to a given data array using the noise intensity and distribution from `NoiseData`.
 
@@ -112,7 +112,7 @@ function find_closest_match(value, noisy_positions)
 end
 
 """
-    compare_shock_positions_over_time_1d(original_positions, noisy_positions; threshold=10.0)
+    compare_shock_positions_over_time_1d(original_positions, noisy_positions; threshold::T=10.0)
 
 Main function to compare 1D shock positions between original and noisy data over time.
 It attempts to match shocks in `original_positions` to those in `noisy_positions` and computes the RMSE (Root Mean Square Error) between matched shocks.
@@ -128,8 +128,8 @@ Unmatched shocks are counted as either false positives (extra detections) or fal
 - `false_negatives_count`: The number of shocks in the original data that were missed in the noisy data.
 - `false_positives_count`: The number of extra shocks detected in the noisy data that do not correspond to any shocks in the original data.
 """
-function compare_shock_positions_over_time_1d(original_positions, noisy_positions; threshold=10.0)
-    diffs = Float64[]  # To store the differences between matched shocks
+function compare_shock_positions_over_time_1d(original_positions, noisy_positions; threshold::T = 10.0) where T
+    diffs = Any[]  # To store the differences between matched shocks
     false_negatives_count = 0  # Count of missed shocks (false negatives)
     false_positives_count = 0  # Count of extra shocks (false positives)
 
@@ -197,8 +197,8 @@ Calculates the residuals between the actual data points and the fitted values ge
 3. Calculate the residual as the absolute difference between the model's fitted value and the `actual_value`.
 4. Return the vector of residuals.
 """
-function calculate_residuals(fit::ShockwaveDetection.Fitting, data_points)
-    residuals = Float64[]
+function calculate_residuals(fit::ShockwaveDetection.Fitting{T}, data_points::Vector{Vector{T}}) where T
+    residuals = Any[]
 
     for point in data_points
         x_value = point[1]  
@@ -223,59 +223,61 @@ end
 Compares fitted curves (shock fits) to the respective clusters of shock points over time.
 
 # Arguments
-- `original_fit`: A vector of fits from the original data over time.
-- `noisy_fit`: A vector of fits from the noisy data over time.
-- `original_shock_positions_over_time`: A vector of shock positions from the original data, for each time step.
-- `noisy_shock_positions_over_time`: A vector of shock positions from the noisy data, for each time step.
-- `flow_data`: An object containing flow data properties such as bounds, number of cells, and number of time steps.
+- `original_fit`: A vector of fitted curves from the original data over time.
+- `noisy_fit`: A vector of fitted curves from the noisy data over time.
+- `original_shock_positions_over_time`: A vector of shock positions from the original data for each time step.
+- `noisy_shock_positions_over_time`: A vector of shock positions from the noisy data for each time step.
+- `flow_data`: An object containing properties of flow data such as bounds, number of cells, and number of time steps.
 - `threshold`: A numeric value (default 10.0) specifying the maximum allowable difference between matched shocks.
 
 # Returns
 - `rmse_results`: A vector containing the root mean square error (RMSE) or norm differences of the fit comparisons over time.
 - `missing_counts`: A dictionary containing counts of mismatches in different categories:
-  - `fit_mismatch_count`: Mismatches between the number of fits and clusters.
-  - `residual_mismatch_count`: Mismatches between the number of residuals.
-  - `norm_mismatch_count`: Mismatches resolved by comparing the second norm of residuals.
+  - `fit_mismatch_count`: Number of mismatches between the number of fits and clusters.
+  - `residual_mismatch_count`: Number of mismatches between the number of residuals calculated.
+  - `norm_mismatch_count`: Number of mismatches resolved by comparing the second norm of residuals.
 
 # Method
-1. For each time step, the function compares shock fits with the respective clusters of shock points.
+1. For each time step, the function iterates over the fitted curves and their respective clusters of shock points.
 2. It calculates the residuals for both the original and noisy fits.
-3. If the residuals differ in length, it calculates the difference in their `L2 norms` instead of performing RMSE.
-4. Returns the RMSE or norm differences for each time step, along with counts of different types of mismatches.
+3. If the residuals differ in length, it calculates the difference in their L2 norms instead of performing RMSE.
+4. It assesses the matches based on the specified `threshold` and counts mismatches in various categories.
+5. The function compiles and returns the RMSE or norm differences for each time step along with counts of different types of mismatches for further analysis.
 """
+
 function compare_shock_fits_over_time(
-    original_fit, noisy_fit, 
-    original_shock_positions_over_time, noisy_shock_positions_over_time, 
-    flow_data, noisy_flow_data, dbscan_algo; threshold=10.0)
+    original_result::ShockwaveDetection.ShockDetectionResult2D, 
+    noisy_result::ShockwaveDetection.ShockDetectionResult2D, 
+    flow_data; threshold=10.0) 
 
     bounds = flow_data.bounds
     nsteps = flow_data.nsteps
 
     # Preallocate RMSE results for each time step
-    rmse_results = Vector{Float64}(undef, nsteps)
+    rmse_results = Vector{Any}(undef, nsteps)
     data_points = Vector{Any}(undef, nsteps)
 
     # Counters for different types of mismatches
     cluster_fit_mismatch_count = 0          # Number of times clusters don't match fits
     empty_residuals_count = 0               # Number of times residuals were empty
     shock_data_missing_count = 0            # Number of times shock points were missing
-    norm_mismatch_count = 0      # Number mismatches resolved by comparing the second norm of residuals.
+    norm_mismatch_count = 0                 # Number mismatches resolved by comparing the second norm of residuals.
 
-    # Cluster the shock points for original and noisy data
-    original_clusters = ShockwaveDetection.cluster_shock_points(dbscan_algo, original_shock_positions_over_time, flow_data)
-    noisy_clusters = ShockwaveDetection.cluster_shock_points(dbscan_algo, noisy_shock_positions_over_time, noisy_flow_data)
+    # Use the shock clusters from the ShockDetectionResult2D struct
+    original_clusters = original_result.shock_clusters_over_time
+    noisy_clusters = noisy_result.shock_clusters_over_time
 
     # Check for mismatch in the number of total clusters and fits before time step iteration
-    if length(original_clusters) != length(original_fit)
+    if length(original_clusters) != length(original_result.shock_fits_over_time)
         error("Mismatch between number of clusters and fits in original data.")
     end
-    if length(noisy_clusters) != length(noisy_fit)
+    if length(noisy_clusters) != length(noisy_result.shock_fits_over_time)
         error("Mismatch between number of clusters and fits in noisy data.")
     end
 
     for t in 1:nsteps
         # Handle cases where shock data is missing in one or both datasets
-        if isempty(original_shock_positions_over_time[t]) || isempty(noisy_shock_positions_over_time[t])
+        if isempty(original_result.shock_positions_over_time[t]) || isempty(noisy_result.shock_positions_over_time[t])
             shock_data_missing_count += 1
             rmse_results[t] = NaN
             data_points[t] = []
@@ -284,7 +286,7 @@ function compare_shock_fits_over_time(
 
         num_original_clusters = length(original_clusters[t])
         num_noisy_clusters = length(noisy_clusters[t])
-        num_fits = length(original_fit[t])  # Number of fits at time step t
+        num_fits = length(original_result.shock_fits_over_time[t])  # Number of fits at time step t
 
         # Check if the number of clusters matches the number of fits for both datasets
         if num_fits != num_original_clusters || num_fits != num_noisy_clusters
@@ -300,8 +302,8 @@ function compare_shock_fits_over_time(
             noisy_data_points = noisy_clusters[t][i]
 
             # Calculate residuals for original and noisy fits
-            original_residuals = calculate_residuals(original_fit[t][i], original_data_points)
-            noisy_residuals = calculate_residuals(noisy_fit[t][i], original_data_points)
+            original_residuals = calculate_residuals(original_result.shock_fits_over_time[t][i], original_data_points)
+            noisy_residuals = calculate_residuals(noisy_result.shock_fits_over_time[t][i], original_data_points)
 
             # If residuals are empty, increment the empty residuals counter
             if isempty(original_residuals) || isempty(noisy_residuals)
@@ -314,14 +316,14 @@ function compare_shock_fits_over_time(
                 # Calculate the second norms of both residuals
                 original_norm = norm(original_residuals, 2)
                 noisy_norm = norm(noisy_residuals, 2)
-    
+
                 # Calculate the difference between the norms
                 norm_difference = abs(original_norm - noisy_norm)
-    
+
                 # Store the difference instead of RMSE
                 rmse_results[t] = norm_difference
                 data_points[t] = []
-    
+
                 norm_mismatch_count += 1  
                 continue
             end

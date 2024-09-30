@@ -12,31 +12,12 @@ point_detect_algo = ImageProcessingShockDetectionAlgo(0.8, :prewitt)
 fitting_algo = FittingAlgo(0.1, true)
 dbscan_algo = DBSCANAlgo(5.95, 3, 10)
 
-#original_detection = detect(flow_data, point_detect_algo, dbscan_algo, fitting_algo)
-#noisy_detection = detect(noisy_flow_data, point_detect_algo, dbscan_algo, fitting_algo)
+# Detect shock points, clusters, and fits for original and noisy data
+original_result = detect(flow_data, point_detect_algo, dbscan_algo, fitting_algo)
+noisy_result = detect(noisy_flow_data, point_detect_algo, dbscan_algo, fitting_algo)
 
-original_shock_positions_over_time = ShockwaveDetection.detect_shock_points(flow_data, point_detect_algo)
-noisy_shock_positions_over_time = ShockwaveDetection.detect_shock_points(noisy_flow_data, point_detect_algo)
-#println("original_shock_positions_over_time: ", original_shock_positions_over_time)
-#println("noisy_shock_positions_over_time: ", noisy_shock_positions_over_time)
-
-original_shock_clusters_over_time = cluster_shock_points(dbscan_algo, original_shock_positions_over_time, flow_data)
-noisy_shock_clusters_over_time = cluster_shock_points(dbscan_algo, noisy_shock_positions_over_time, flow_data)
-#println("original_shock_clusters_over_time: ", original_shock_clusters_over_time)
-#println("noisy_shock_clusters_over_time: ", noisy_shock_clusters_over_time)
-
-original_shock_fits_over_time = fit_shock_clusters_over_time(original_shock_clusters_over_time, fitting_algo)
-noisy_shock_fits_over_time = fit_shock_clusters_over_time(noisy_shock_clusters_over_time, fitting_algo)
-#println("original_shock_fits_over_time: ", original_shock_fits_over_time)
-#println("noisy_shock_fits_over_time: ", noisy_shock_fits_over_time)
-
-
-rmse_value = NoiseAnalysis.compare_shock_fits_over_time(original_shock_fits_over_time, noisy_shock_fits_over_time, original_shock_positions_over_time, noisy_shock_positions_over_time, flow_data, noisy_flow_data, dbscan_algo; threshold=10.0)
+rmse_value = NoiseAnalysis.compare_shock_fits_over_time(original_result, noisy_result, flow_data; threshold=10.0)
 println("RMSE between fits, cluster_fit_mismatch_count, empty_residuals_count, shock_data_missing_count, residual_length_mismatch_count: ", rmse_value)
-
-#shock_fits_difference = NoiseAnalysis.compare_shock_fits_over_time(original_shock_fits_over_time, noisy_shock_fits_over_time)
 
 #plot_shock_fits_over_time(flow_data, original_detection, true)
 #plot_shock_fits_over_time(noisy_flow_data, noisy_detection, true)
-#shock_position_difference = NoiseAnalysis.compare_shock_positions_over_time_2d(original_shock_positions_over_time, noisy_shock_positions_over_time)
-#println("Shock position difference: ", shock_position_difference)
