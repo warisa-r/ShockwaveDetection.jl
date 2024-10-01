@@ -2,7 +2,7 @@
 
 julia_version = "1.9.4"
 manifest_format = "2.0"
-project_hash = "965d110b9b8f0216f06aeaf0ee760e6f852df6f4"
+project_hash = "ff84aaf521bef5bb0def556990586a48c031ef36"
 
 [[deps.ANSIColoredPrinters]]
 git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
@@ -1104,6 +1104,12 @@ git-tree-sha1 = "110897e7db2d6836be22c18bffd9422218ee6284"
 uuid = "d3a379c0-f9a3-5b72-a4c0-6bf4d2e8af0f"
 version = "2.12.0+0"
 
+[[deps.LocalRegistry]]
+deps = ["Random", "RegistryInstances", "RegistryTools", "TOML", "UUIDs"]
+git-tree-sha1 = "80d096310838ebd9dfbe7934034da35c26ff4df4"
+uuid = "89398ba2-070a-4b16-a995-9893c55d93cf"
+version = "0.5.7"
+
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
 git-tree-sha1 = "a2d09619db4e765091ee5c6ffe8872849de0feea"
@@ -1574,6 +1580,12 @@ deps = ["LazilyInitializedFields", "Pkg", "TOML", "Tar"]
 git-tree-sha1 = "ffd19052caf598b8653b99404058fce14828be51"
 uuid = "2792f1a3-b283-48e8-9a74-f99dce5104f3"
 version = "0.1.0"
+
+[[deps.RegistryTools]]
+deps = ["LibGit2", "Pkg", "SHA", "UUIDs"]
+git-tree-sha1 = "c0ac28884fab9ae94ed8cf3448aa950afc2ff9c1"
+uuid = "d1eb7eb1-105f-429d-abf5-b0f65cb9e2c4"
+version = "2.3.0"
 
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
