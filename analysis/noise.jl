@@ -42,7 +42,7 @@ function NoiseData(density_intensity::T, velocity_intensity::T, pressure_intensi
 end
 
 """
-    apply_noise(data::Array{T}, distribution::D, noise_intensity) -> Array{T, D}
+    apply_noise(data::Array{T}, noise_intensity, distribution::D) -> Array{T, D}
 
 Applies noise to a given data array using the noise intensity and distribution from `NoiseData`.
 
@@ -54,7 +54,7 @@ Applies noise to a given data array using the noise intensity and distribution f
 # Returns
 - An array with noise added to the original data.
 """
-function apply_noise(data::Array{T}, distribution::D, noise_intensity) where {T,D}
+function apply_noise(data::Array{T}, noise_intensity, distribution::D) where {T,D}
     return data .+ noise_intensity * rand(distribution, size(data))
 end
 
