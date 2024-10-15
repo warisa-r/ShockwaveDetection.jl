@@ -8,49 +8,54 @@ using Statistics
 using .NoiseAnalysis
 
 """
-    struct NoiseData
-
 A structure to store noise configuration for testing and analysis purposes.
 
 # Fields
-- `intensity::T`: The intensity of the noise.
+- `density_intensity::T`: The intensity of the noise for density.
+- `velocity_intensity::T`: The intensity of the noise for velocity.
+- `pressure_intensity::T`: The intensity of the noise for pressure.
 - `distribution::D`: The probability distribution used to generate noise.
 """
 struct NoiseData{T, D}
-    intensity::T
+    density_intensity::T
+    velocity_intensity::T
+    pressure_intensity::T
     distribution::D
 end
 
 """
-    NoiseData(intensity::T, distribution::D) -> NoiseData{T}
+    NoiseData(density_intensity::T, velocity_intensity::T, pressure_intensity::T, distribution::D) -> NoiseData{T, D}
 
-Constructs a `NoiseData` instance with the specified intensity and distribution.
+Constructs a `NoiseData` instance with the specified intensities and distribution.
 
 # Arguments
-- `intensity`: Representing the intensity of the noise.
-- `distribution`: The probability distribution used to generate noise.
+- `density_intensity::T`: The intensity of the noise for density.
+- `velocity_intensity::T`: The intensity of the noise for velocity.
+- `pressure_intensity::T`: The intensity of the noise for pressure.
+- `distribution::D`: The probability distribution used to generate noise.
 
 # Returns
 - A `NoiseData` instance.
 """
-function NoiseData(intensity::T, distribution::D) where {T, D}
-    return NoiseData{T, D}(intensity, distribution)
+function NoiseData(density_intensity::T, velocity_intensity::T, pressure_intensity, distribution::D) where {T, D}
+    return NoiseData{T, D}(density_intensity::T, velocity_intensity::T, pressure_intensity, distribution)
 end
 
 """
-    apply_noise(data::Array{T}, noise_data::NoiseData) -> Array{T, D}
+    apply_noise(data::Array{T}, distribution::D, noise_intensity) -> Array{T, D}
 
 Applies noise to a given data array using the noise intensity and distribution from `NoiseData`.
 
 # Arguments
 - `data`: The original data array to which noise will be applied.
-- `noise_data`: A `NoiseData` struct containing the noise configuration.
+- `distribution`: The distribution of the noise being applied to the data.
+- `noise_intensity`: The intensity of the noise to be added.
 
 # Returns
 - An array with noise added to the original data.
 """
-function apply_noise(data::Array{T}, noise_data::NoiseData) where T
-    return data .+ noise_data.intensity * rand(noise_data.distribution, size(data))
+function apply_noise(data::Array{T}, distribution::D, noise_intensity) where {T,D}
+    return data .+ noise_intensity * rand(distribution, size(data))
 end
 
 """
@@ -66,9 +71,10 @@ Applies noise to the fields of the `FlowData` struct (density, velocity, pressur
 - A new `FlowData` struct with noise added to the relevant fields.
 """
 function apply_noise_to_flow(flow_data::FlowData, noise_data::NoiseData)
-    noisy_density_field = apply_noise(flow_data.density_field, noise_data)
-    noisy_velocity_field = apply_noise(flow_data.velocity_field, noise_data)
-    noisy_pressure_field = apply_noise(flow_data.pressure_field, noise_data)
+    noise_distribution = noise_data.distribution
+    noisy_density_field = apply_noise(flow_data.density_field, noise_data.density_intensity, noise_distribution)
+    noisy_velocity_field = apply_noise(flow_data.velocity_field, noise_data.velocity_intensity, noise_distribution)
+    noisy_pressure_field = apply_noise(flow_data.pressure_field, noise_data.pressure_intensity, noise_distribution)
 
     # Create a new FlowData struct with noisy fields
     return FlowData(
