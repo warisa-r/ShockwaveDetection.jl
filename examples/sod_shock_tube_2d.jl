@@ -1,5 +1,4 @@
 using ShockwaveDetection
-ENV["JULIA_NUM_THREADS"] = "4"
 
 flow_data = FlowData("examples/data/sod_shock_right_2d.tape", false)
 

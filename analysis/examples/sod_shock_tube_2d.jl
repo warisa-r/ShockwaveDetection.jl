@@ -2,7 +2,6 @@ using ShockwaveDetection
 include("../NoiseAnalysis.jl")
 using .NoiseAnalysis
 using Distributions
-ENV["JULIA_NUM_THREADS"] = "4"
 
 flow_data = FlowData("examples/data/sod_shock_right_2d.tape", false)
 noise_data = NoiseAnalysis.NoiseData(0.01, Normal(0, 0.1))
