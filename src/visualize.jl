@@ -33,14 +33,15 @@ function create_wave_animation_1D(flow_data::FlowData)
 
     # Create an animation
     anim = @animate for (i, t) in enumerate(tsteps)
-        p1 = plot(x, density_field[:, i], title="Density at Time $t", xlabel="x", ylabel="Density(kg/m^3)", label="Density across x", size=(800, 600))
+        t_rounded = round(t, sigdigits=4)
+        p1 = plot(x, density_field[:, i], title="Density at Time $t_rounded", xlabel="x", ylabel="Density(kg/m^3)", label="Density across x", size=(800, 600))
         if flow_data.mach_to_m_s
-            p2 = plot(x, velocity_field[:, i], title="Velocity at Time $t", xlabel="x", ylabel="Velocity(m/s)", label="Velocity across x", size=(800, 600))
+            p2 = plot(x, velocity_field[:, i], title="Velocity at Time $t_rounded", xlabel="x", ylabel="Velocity(m/s)", label="Velocity across x", size=(800, 600))
         else
-            p2 = plot(x, velocity_field[:, i], title="Velocity at Time $t", xlabel="x", ylabel="Velocity(Mach)", label="Velocity across x", size=(800, 600))
+            p2 = plot(x, velocity_field[:, i], title="Velocity at Time $t_rounded", xlabel="x", ylabel="Velocity(Mach)", label="Velocity across x", size=(800, 600))
         end
         
-        p3 = plot(x, pressure_field[:, i], title="Pressure at Time $t", xlabel="x", ylabel="Pressure(Pa)", label="Pressure across x", size=(800, 600))
+        p3 = plot(x, pressure_field[:, i], title="Pressure at Time $t_rounded", xlabel="x", ylabel="Pressure(Pa)", label="Pressure across x", size=(800, 600))
         plot(p1, p2, p3, layout=(3, 1))
     end
 
@@ -84,13 +85,14 @@ function create_wave_animation_with_shock_1D(flow_data::FlowData, shock_position
 
     # Create an animation
     anim = @animate for (t_step, t) in enumerate(tsteps)
-        p1 = plot(x, density_field[:, t_step], title="Density at Time(kg/m^3) $t", xlabel="x", ylabel="Density", label="Density across x", size=(800, 600))
+        t_rounded = round(t, sigdigits=4)
+        p1 = plot(x, density_field[:, t_step], title="Density at Time(kg/m^3) $t_rounded", xlabel="x", ylabel="Density", label="Density across x", size=(800, 600))
         if flow_data.mach_to_m_s
-            p2 = plot(x, velocity_field[:, t_step], title="Velocity at Time (m/s) $t", xlabel="x", ylabel="Velocity", label="Velocity across x", size=(800, 600))
+            p2 = plot(x, velocity_field[:, t_step], title="Velocity at Time (m/s) $t_rounded", xlabel="x", ylabel="Velocity", label="Velocity across x", size=(800, 600))
         else
-            p2 = plot(x, velocity_field[:, t_step], title="Velocity at Time (Mach) $t", xlabel="x", ylabel="Velocity", label="Velocity across x", size=(800, 600))
+            p2 = plot(x, velocity_field[:, t_step], title="Velocity at Time (Mach) $t_rounded", xlabel="x", ylabel="Velocity", label="Velocity across x", size=(800, 600))
         end
-        p3 = plot(x, pressure_field[:, t_step], title="Pressure at Time(Pa) $t", xlabel="x", ylabel="Pressure", label="Pressure across x", size=(800, 600))
+        p3 = plot(x, pressure_field[:, t_step], title="Pressure at Time(Pa) $t_rounded", xlabel="x", ylabel="Pressure", label="Pressure across x", size=(800, 600))
         
         # Add markers for the shock positions
         shock_positions_t = shock_positions_over_time[t_step]
