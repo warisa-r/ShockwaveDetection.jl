@@ -141,13 +141,14 @@ function create_heatmap_evo_1D(flow_data::FlowData, field::Symbol, tube_circumfe
 
     # Record the animation
     CairoMakie.record(fig, "$(field)_evolution.gif", enumerate(tsteps); framerate = 10) do (t, t_step)
+        t_step_rounded = round(t_step, sigdigits=4)
         field_t = field_data[:, t]
         field_tube = repeat(field_t, 1, 7)
 
         # Create the heatmap and store the returned object
         CairoMakie.heatmap!(ax, x, y, field_tube)
         
-        ax.title = "$field Field - Time Step: $t_step"
+        ax.title = "$field Field - Time Step: $t_step_rounded"
     end
 end
 
